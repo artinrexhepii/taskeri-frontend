@@ -1,0 +1,3 @@
+<!-- This is a comment file to represent the presence of favicon.ico -->
+<!-- In a real project, you would need to place an actual .ico file here -->
+<!-- This is just a placeholder since we can't create binary files directly -->
