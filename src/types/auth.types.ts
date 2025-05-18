@@ -1,18 +1,19 @@
-import { UserBasicInfo } from "./user.types";
+import { UserBasicInfo, UserDetails } from "./user.types";
 
 export interface LoginRequest {
   email: string;
   password: string;
-  remember_me?: boolean;
+  tenant_id?: string;
 }
 
-export interface LoginResponse {
+export interface AuthResponse {
   access_token: string;
   token_type: string;
-  expires_in: number;
-  refresh_token: string;
-  user: UserBasicInfo;
+  user: UserDetails;
 }
+
+// Keeping this for backward compatibility if needed
+export interface LoginResponse extends AuthResponse {}
 
 export interface TokenRefreshRequest {
   refresh_token: string;

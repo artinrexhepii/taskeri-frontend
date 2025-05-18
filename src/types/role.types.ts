@@ -1,16 +1,15 @@
-export interface Permission {
-  id: number;
-  name: string;
+import { RoleResponse, PermissionResponse } from "./role-permission.types";
+
+export interface Permission extends PermissionResponse {
   description?: string;
 }
 
-export interface Role {
-  id: number;
-  name: string;
+export interface Role extends RoleResponse {
   description?: string;
   permissions?: Permission[];
 }
 
+// For backward compatibility
 export interface RoleCreate {
   name: string;
   description?: string;

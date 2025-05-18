@@ -7,25 +7,36 @@ export interface TeamBasicInfo {
   name: string;
 }
 
-export interface Team extends TeamBasicInfo {
-  description?: string;
-  department_id?: number;
-  created_at: string;
-  updated_at: string;
-}
-
 export interface TeamCreate {
   name: string;
+  department_id: number;
   description?: string;
-  department_id?: number;
   member_ids?: number[];
 }
 
 export interface TeamUpdate {
   name?: string;
+  department_id?: number;
+  description?: string;
+  member_ids?: number[];
+}
+
+export interface TeamResponse {
+  id: number;
+  name: string;
+  department_id?: number;
+}
+
+export interface TeamStatistics {
+  stats: Record<number, number>; // department_id -> number of teams
+}
+
+// For backward compatibility
+export interface Team extends TeamBasicInfo {
   description?: string;
   department_id?: number;
-  member_ids?: number[];
+  created_at: string;
+  updated_at: string;
 }
 
 export interface TeamDetailResponse extends Team {

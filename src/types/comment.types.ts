@@ -9,8 +9,7 @@ export interface CommentCreate extends CommentBase {
   user_id: number;
 }
 
-export interface CommentUpdate extends CommentBase {
-}
+export interface CommentUpdate extends CommentBase {}
 
 export interface CommentResponse {
   id: number;
@@ -19,6 +18,7 @@ export interface CommentResponse {
   created_at: string;
   user?: UserBasicInfo;
 }
+
 
 export interface CommentListResponse {
   items: CommentResponse[];
