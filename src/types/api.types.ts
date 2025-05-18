@@ -1,8 +1,7 @@
 export interface ApiError {
-  status: number;
-  message: string;
-  detail?: string;
-  errors?: Record<string, string[]>;
+  status_code: number;
+  detail: string;
+  message?: string;
 }
 
 export interface ValidationError {
@@ -22,4 +21,5 @@ export interface PaginatedResponse<T> {
   total: number;
   page: number;
   page_size: number;
+  pages: number;
 }
