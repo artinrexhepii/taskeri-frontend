@@ -18,18 +18,3 @@ export interface CommentResponse {
   created_at: string;
   user?: UserBasicInfo;
 }
-
-
-export interface CommentListResponse {
-  items: CommentResponse[];
-  total: number;
-  page: number;
-  page_size: number;
-}
-
-export interface CommentFilter {
-  taskId?: string;
-  createdBy?: string;
-  startDate?: string;
-  endDate?: string;
-}

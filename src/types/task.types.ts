@@ -71,8 +71,3 @@ export interface TaskStatistics {
   tasks_by_priority: Record<string, number>;
 }
 
-// For backward compatibility
-export type StatusEnum = TaskStatus;
-export type PriorityEnum = TaskPriority;
-export type Task = TaskResponse;
-export type TaskDetail = TaskDetailResponse;

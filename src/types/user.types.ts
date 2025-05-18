@@ -1,5 +1,4 @@
 import { RoleResponse } from "./role-permission.types";
-import { Role } from "./role.types";
 
 export interface UserBase {
   email: string;
@@ -61,38 +60,4 @@ export interface UserBasicInfo {
   first_name: string;
   last_name: string;
   email: string;
-}
-
-// Keeping these for backward compatibility if needed
-export interface UserProfile {
-  id: number;
-  user_id: number;
-  phone_number?: string;
-  address?: string;
-  bio?: string;
-  preferences?: Record<string, any>;
-}
-
-export interface UserListResponse {
-  items: User[];
-  total: number;
-  page: number;
-  page_size: number;
-}
-
-export interface UserFilterParams {
-  search?: string;
-  role_id?: number;
-  is_active?: boolean;
-  sort_by?: string;
-  sort_order?: 'asc' | 'desc';
-}
-
-export interface User extends UserBasicInfo {
-  roles?: Role[];
-  created_at: string;
-  updated_at: string;
-  last_login?: string;
-  is_active: boolean;
-  profile_image_url?: string;
 }
