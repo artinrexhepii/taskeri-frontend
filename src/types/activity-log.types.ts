@@ -18,3 +18,11 @@ export interface ActivityLogResponse {
   details?: string;
   created_at: string;
 }
+export interface ActivityLogFilterParams {
+  user_id?: number;
+  action?: string;
+  entity_type?: string;
+  entity_id?: number;
+  from_timestamp?: string;
+  to_timestamp?: string;
+}

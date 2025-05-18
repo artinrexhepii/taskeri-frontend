@@ -15,6 +15,7 @@ export interface CommentResponse {
   id: number;
   content: string;
   user_id: number;
+  task_id: number;  
   created_at: string;
   user?: UserBasicInfo;
 }

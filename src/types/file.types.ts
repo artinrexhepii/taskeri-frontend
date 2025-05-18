@@ -10,6 +10,7 @@ export interface FileAttachmentUpdate {
 }
 
 export interface FileAttachmentResponse {
+  task_id: any;
   id: number;
   file_path: string;
   uploaded_at: string;
