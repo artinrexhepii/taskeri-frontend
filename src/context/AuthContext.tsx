@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { login, logout, getCurrentUser } from '../api/services/auth.service';
+import { login, logout } from '../api/services/auth.service';
 import { registerTenant } from '../api/services/tenant.service';
 import { LoginRequest, AuthResponse, TenantRegisterRequest, RegisterResponse } from '../types/auth.types';
 import { UserDetails } from '../types/user.types';
@@ -9,7 +9,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   error: string | null;
-  login: (credentials: LoginRequest) => Promise<void>;
+  login: (credentials: LoginRequest) => Promise<boolean>;
   registerTenant: (data: TenantRegisterRequest) => Promise<RegisterResponse>;
   logout: () => Promise<void>;
 }
@@ -20,7 +20,7 @@ const defaultAuthContext: AuthContextType = {
   isLoading: false,
   isAuthenticated: false,
   error: null,
-  login: async () => {},
+  login: async () => false,
   registerTenant: async () => ({ message: '', user_id: 0, tenant_id: 0 }),
   logout: async () => {},
 };
@@ -37,25 +37,24 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<UserDetails | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   // Check if user is already logged in on mount
   useEffect(() => {
     const checkAuthStatus = async () => {
-      try {
-        const token = localStorage.getItem('access_token');
-        if (token) {
-          const userData = await getCurrentUser();
-          setUser(userData);
+      const token = localStorage.getItem('access_token');
+      const storedUser = localStorage.getItem('user');
+      
+      if (token && storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+        } catch (error) {
+          console.error('Failed to parse stored user:', error);
+          localStorage.removeItem('user');
+          localStorage.removeItem('access_token');
         }
-      } catch (error) {
-        console.error('Authentication check failed:', error);
-        // Clear any invalid tokens
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('tenant_id');
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -63,15 +62,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   // Login handler
-  const handleLogin = async (credentials: LoginRequest) => {
+  const handleLogin = async (credentials: LoginRequest): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await login(credentials);
-      setUser(response.user);
+      if (credentials.user) {
+        setUser(credentials.user);
+        return true;
+      }
+      return false;
     } catch (error: any) {
-      setError(error.message || 'Login failed. Please check your credentials.');
-      throw error;
+      const errorMessage = error.response?.data?.detail || error.message || 'Login failed. Please check your credentials.';
+      setError(errorMessage);
+      setUser(null);
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -85,7 +91,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await registerTenant(data);
       return response;
     } catch (error: any) {
-      setError(error.message || 'Registration failed. Please try again later.');
+      const errorMessage = error.response?.data?.detail || error.message || 'Registration failed. Please try again later.';
+      setError(errorMessage);
       throw error;
     } finally {
       setIsLoading(false);
@@ -98,18 +105,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await logout();
       setUser(null);
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
     } catch (error: any) {
-      setError(error.message || 'Logout failed.');
+      const errorMessage = error.response?.data?.detail || error.message || 'Logout failed.';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Update isAuthenticated whenever user or token changes
+  const isAuthenticated = !!user && !!localStorage.getItem('access_token');
+
   // Context value
   const contextValue: AuthContextType = {
     user,
     isLoading,
-    isAuthenticated: !!user,
+    isAuthenticated,
     error,
     login: handleLogin,
     registerTenant: handleTenantRegistration,

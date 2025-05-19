@@ -4,8 +4,8 @@ export interface UserBase {
   email: string;
   first_name: string;
   last_name: string;
-  department_id?: number;
-  team_id?: number;
+  department_id: number | null;
+  team_id: number | null;
 }
 
 export interface UserCreate extends UserBase {
@@ -17,8 +17,8 @@ export interface UserUpdate {
   email?: string;
   first_name?: string;
   last_name?: string;
-  department_id?: number;
-  team_id?: number;
+  department_id?: number | null;
+  team_id?: number | null;
 }
 
 export interface UserResponse extends UserBase {
@@ -32,12 +32,14 @@ export interface UserDetails {
   email: string;
   first_name: string;
   last_name: string;
-  department_id?: number;
-  team_id?: number;
+  department_id: number | null;
+  team_id: number | null;
   tenant_schema?: string;
   is_active?: boolean;
   roles?: RoleResponse[];
   permissions?: string[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface TenantUserCreate {

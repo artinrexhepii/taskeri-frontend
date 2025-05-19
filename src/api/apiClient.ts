@@ -83,8 +83,12 @@ class ApiClient {
       const errorData = error.response.data as ApiError;
       console.error(`API Error (${error.response.status}):`, errorData);
       
-      // You could also dispatch to an error handling service or state
-      // errorStore.setError(errorData);
+      // Log the request details for debugging
+      if (error.config) {
+        console.error('Request URL:', error.config.url);
+        console.error('Request Method:', error.config.method);
+        console.error('Request Headers:', error.config.headers);
+      }
     } else {
       console.error('Unexpected error:', error);
     }

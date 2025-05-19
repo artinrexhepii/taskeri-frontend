@@ -2,14 +2,15 @@ export interface PaginatedResponse<T> {
   items: T[];
   total: number;
   page: number;
-  page_size: number;
+  size: number;
   pages: number;
 }
 
 export interface ApiError {
-  status_code: number;
   detail: string;
+  status_code: number;
   message?: string;
+  errors?: Record<string, string[]>;
 }
 
 export interface ValidationError {
@@ -20,6 +21,6 @@ export interface ValidationError {
 
 export interface ApiResponse<T> {
   data: T;
-  status: number;
   message?: string;
+  status: 'success' | 'error';
 }

@@ -25,7 +25,7 @@ export const API_ENDPOINTS = {
     
     // Project endpoints
     PROJECTS: {
-      BASE: '/projects',
+      BASE: '/projects/',
       DETAIL: (id: number) => `/projects/${id}`,
       STATISTICS: '/projects/statistics',
     },
