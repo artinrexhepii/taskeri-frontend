@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
+import { useLogin } from '../../api/hooks/auth/useLogin';
+import { Alert } from '@mui/material';
 import Button from '../../components/common/Button/Button';
 import Card from '../../components/common/Card/Card';
 import Input from '../../components/common/Input/Input';
@@ -20,24 +22,31 @@ interface RegisterFormData {
 }
 
 const RegisterPage: React.FC = () => {
-  const { registerTenant } = useAuth();
+  const { registerTenant, isAuthenticated } = useAuth();
   const { showNotification } = useNotification();
+  const loginMutation = useLogin();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<RegisterFormData>();
   const password = watch('password');
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/register-company', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setIsLoading(true);
-      
-      // Generate tenant schema from company name (lowercase, replace spaces with underscores)
+
       const tenantSchema = data.companyName
         .toLowerCase()
         .replace(/\s+/g, '_')
         .replace(/[^a-z0-9_]/g, '');
-      
+
       const registerData: TenantRegisterRequest = {
         email: data.email,
         password: data.password,
@@ -46,17 +55,18 @@ const RegisterPage: React.FC = () => {
         company_name: data.companyName,
         tenant_schema: tenantSchema
       };
-      
-      const response = await registerTenant(registerData);
-      
+
+      await registerTenant(registerData);
+
+      loginMutation.mutate({ email: data.email, password: data.password });
+
       showNotification(
-        'success', 
-        'Registration successful!', 
-        'Your company account has been created. You can now log in.'
+        'success',
+        'Registration successful!',
+        'Your company account has been created. You can now proceed to set up your company.'
       );
-      
-      // Redirect to login page after successful registration
-      navigate('/login');
+
+      navigate('/register-company');
     } catch (error) {
       showNotification(
         'error',
@@ -67,6 +77,8 @@ const RegisterPage: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  const errorMessage = loginMutation.error?.message || 'Login failed. Please check your credentials.';
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -177,12 +189,18 @@ const RegisterPage: React.FC = () => {
             )}
           </div>
 
+          {(loginMutation.isError) && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {errorMessage}
+            </Alert>
+          )}
+
           <div>
             <Button
               type="submit"
               variant="primary"
               className='w-full'
-              isLoading={isSubmitting || isLoading}
+              isLoading={isSubmitting || isLoading || loginMutation.isPending}
             >
               Register Company
             </Button>

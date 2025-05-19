@@ -22,6 +22,10 @@ const TimeTracking = lazy(() => import('../pages/time-tracking/TimeTracking'));
 const Reports = lazy(() => import('../pages/reports/Reports'));
 const Settings = lazy(() => import('../pages/settings/Settings'));
 const FileAttachments = lazy(() => import('../pages/file-attachments/FileAttachments'));
+const RegisterCompanyPage = lazy(() => import('../pages/company/RegisterCompanyPage'));
+const RegisterDepartmentPage = lazy(() => import('../pages/department/RegisterDepartmentPage'));
+const RegisterTeamPage = lazy(() => import('../pages/team/RegisterTeamPage'));
+const RegisterUserPage = lazy(() => import('../pages/users/RegisterUserPage'));
 
 export interface Route {
   path: string;
@@ -164,6 +168,24 @@ export const routes: Routes = {
     path: '/attachments',
     component: FileAttachments,
     protected: true
+  },
+
+  // Registration routes
+  registerCompany: {
+    path: '/register-company',
+    component: RegisterCompanyPage
+  },
+  registerDepartment: {
+    path: '/register-department',
+    component: RegisterDepartmentPage
+  },
+  registerTeam: {
+    path: '/register-team',
+    component: RegisterTeamPage
+  },
+  registerUser: {
+    path: '/register-user',
+    component: RegisterUserPage
   }
 };
 
