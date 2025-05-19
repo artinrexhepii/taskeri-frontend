@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useNotification } from '../../context/NotificationContext';
 import { useCreateTeam } from '../../api/hooks/teams/useCreateTeam';
+import { useDepartments } from '../../api/hooks/departments/useDepartments';
 import { TeamCreate } from '../../types/team.types';
 import Button from '../../components/common/Button/Button';
 import Input from '../../components/common/Input/Input';
+import Select from '../../components/common/Select/Select';
 
 interface TeamFormData {
   name: string;
@@ -18,6 +20,7 @@ const RegisterTeamPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<TeamFormData>();
   const createTeamMutation = useCreateTeam();
+  const { data: departments, isLoading: departmentsLoading } = useDepartments();
 
   const onSubmit = async (data: TeamFormData) => {
     try {
@@ -43,17 +46,25 @@ const RegisterTeamPage: React.FC = () => {
           Register Your Team
         </h2>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div className="rounded-md shadow-sm space-y-4">
             <Input
               label="Team Name"
               {...register('name', { required: 'Team name is required' })}
               error={errors.name?.message}
             />
-            <Input
-              label="Department ID"
-              {...register('departmentId', { required: 'Department ID is required' })}
+            <Select
+              label="Department"
+              {...register('departmentId', { required: 'Department is required' })}
               error={errors.departmentId?.message}
-            />
+              disabled={departmentsLoading}
+            >
+              <option value="">Select a department</option>
+              {departments?.map((department) => (
+                <option key={department.id} value={department.id}>
+                  {department.name}
+                </option>
+              ))}
+            </Select>
           </div>
           <div>
             <Button type="submit" variant="primary" isLoading={isLoading}>

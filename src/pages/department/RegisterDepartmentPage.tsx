@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useNotification } from '../../context/NotificationContext';
 import { useCreateDepartment } from '../../api/hooks/departments/useCreateDepartment';
+import { useCompany } from '../../api/hooks/companies/useCompany';
 import { DepartmentCreate } from '../../types/department.types';
 import Button from '../../components/common/Button/Button';
 import Input from '../../components/common/Input/Input';
+import Select from '../../components/common/Select/Select';
 
 interface DepartmentFormData {
   name: string;
@@ -18,6 +20,7 @@ const RegisterDepartmentPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<DepartmentFormData>();
   const createDepartmentMutation = useCreateDepartment();
+  const { data: companies, isLoading: companiesLoading } = useCompany();
 
   const onSubmit = async (data: DepartmentFormData) => {
     try {
@@ -43,17 +46,28 @@ const RegisterDepartmentPage: React.FC = () => {
           Register Your Department
         </h2>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div className="rounded-md shadow-sm space-y-4">
             <Input
               label="Department Name"
               {...register('name', { required: 'Department name is required' })}
               error={errors.name?.message}
             />
-            <Input
-              label="Company ID"
-              {...register('companyId', { required: 'Company ID is required' })}
+            <Select
+              label="Company"
+              {...register('companyId', {
+                required: 'Company is required',
+                validate: (value) => !!value || 'Please select a valid company',
+              })}
               error={errors.companyId?.message}
-            />
+              disabled={companiesLoading}
+            >
+              <option value="">Select a company</option>
+              {companies?.map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.name}
+                </option>
+              ))}
+            </Select>
           </div>
           <div>
             <Button type="submit" variant="primary" isLoading={isLoading}>

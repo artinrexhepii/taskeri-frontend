@@ -5,6 +5,9 @@ import { useCreateUser } from '../../api/hooks/users/useCreateUser';
 import { UserCreate } from '../../types/user.types';
 import Button from '../../components/common/Button/Button';
 import Input from '../../components/common/Input/Input';
+import { useTeams } from '../../api/hooks/teams/useTeams';
+import { useDepartments } from '../../api/hooks/departments/useDepartments';
+import Select from '../../components/common/Select/Select';
 
 interface UserFormData {
   first_name: string;
@@ -20,6 +23,8 @@ const RegisterUserPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<UserFormData>();
   const createUserMutation = useCreateUser();
+  const { data: teams, isLoading: teamsLoading } = useTeams();
+  const { data: departments, isLoading: departmentsLoading } = useDepartments();
 
   const onSubmit = async (data: UserFormData) => {
     try {
@@ -49,7 +54,7 @@ const RegisterUserPage: React.FC = () => {
           Register a User
         </h2>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div className="rounded-md shadow-sm space-y-4">
             <Input
               label="First Name"
               {...register('first_name', { required: 'First name is required' })}
@@ -71,16 +76,32 @@ const RegisterUserPage: React.FC = () => {
               {...register('role', { required: 'Role is required' })}
               error={errors.role?.message}
             />
-            <Input
-              label="Team ID"
-              {...register('teamId', { required: 'Team ID is required' })}
+            <Select
+              label="Team"
+              {...register('teamId', { required: 'Team is required' })}
               error={errors.teamId?.message}
-            />
-            <Input
-              label="Department ID"
-              {...register('department_id', { required: 'Department ID is required' })}
+              disabled={teamsLoading}
+            >
+              <option value="">Select a team</option>
+              {teams?.map((team) => (
+                <option key={team.id} value={team.id}>
+                  {team.name}
+                </option>
+              ))}
+            </Select>
+            <Select
+              label="Department"
+              {...register('department_id', { required: 'Department is required' })}
               error={errors.department_id?.message}
-            />
+              disabled={departmentsLoading}
+            >
+              <option value="">Select a department</option>
+              {departments?.map((department) => (
+                <option key={department.id} value={department.id}>
+                  {department.name}
+                </option>
+              ))}
+            </Select>
           </div>
           <div>
             <Button type="submit" variant="primary" isLoading={isLoading}>
