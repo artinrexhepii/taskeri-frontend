@@ -86,6 +86,56 @@ const Router: React.FC = () => {
             />
           </Route>
 
+          {/* Registration flow routes */}
+          <Route
+            path="/register-company"
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<LoadingFallback />}>
+                  {routes.registerCompany?.component && <routes.registerCompany.component />}
+                </Suspense>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/register-department"
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<LoadingFallback />}>
+                  {routes.registerDepartment?.component && <routes.registerDepartment.component />}
+                </Suspense>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/register-team"
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<LoadingFallback />}>
+                  {routes.registerTeam?.component && <routes.registerTeam.component />}
+                </Suspense>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/register-user"
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<LoadingFallback />}>
+                  {routes.registerUser?.component && <routes.registerUser.component />}
+                </Suspense>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+
           {/* Protected routes */}
           <Route
             element={

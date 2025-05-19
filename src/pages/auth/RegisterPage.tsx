@@ -27,20 +27,22 @@ const RegisterPage: React.FC = () => {
   const loginMutation = useLogin();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<RegisterFormData>();
   const password = watch('password');
 
-  // Redirect if already authenticated
+  // Only redirect if authenticated and not in the process of registering
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/register-company', { replace: true });
+    if (isAuthenticated && !isRegistering && localStorage.getItem('company_registered') === 'true') {
+      navigate('/dashboard', { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, isRegistering]);
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setIsLoading(true);
+      setIsRegistering(true);
 
       const tenantSchema = data.companyName
         .toLowerCase()
@@ -56,9 +58,11 @@ const RegisterPage: React.FC = () => {
         tenant_schema: tenantSchema
       };
 
-      await registerTenant(registerData);
+      // Register the tenant
+      const response = await registerTenant(registerData);
 
-      loginMutation.mutate({ email: data.email, password: data.password });
+      // Login the user
+      await loginMutation.mutateAsync({ email: data.email, password: data.password });
 
       showNotification(
         'success',
@@ -66,6 +70,10 @@ const RegisterPage: React.FC = () => {
         'Your company account has been created. You can now proceed to set up your company.'
       );
 
+      // Set a flag to indicate company registration is not complete
+      localStorage.setItem('company_registered', 'false');
+
+      // Navigate to company registration
       navigate('/register-company');
     } catch (error) {
       showNotification(
@@ -75,6 +83,7 @@ const RegisterPage: React.FC = () => {
       );
     } finally {
       setIsLoading(false);
+      setIsRegistering(false);
     }
   };
 

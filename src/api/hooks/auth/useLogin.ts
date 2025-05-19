@@ -25,9 +25,10 @@ export const useLogin = () => {
           user: data.user // Pass the user object to the auth context
         });
 
-        if (success) {
-          // Only navigate if login was successful
-          navigate('/', { replace: true });
+        if (!success) {
+          // Clean up on error
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('user');
         }
       } catch (error) {
         console.error('Failed to complete login:', error);
