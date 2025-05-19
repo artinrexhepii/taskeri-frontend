@@ -23,7 +23,7 @@ const TimeTracking = lazy(() => import('../pages/time-tracking/TimeTracking'));
 const Reports = lazy(() => import('../pages/reports/Reports'));
 const Settings = lazy(() => import('../pages/settings/Settings'));
 const FileAttachments = lazy(() => import('../pages/file-attachments/FileAttachments'));
-const LeaveRequests = lazy(() => import('../pages/leave-requests/LeaveRequestForm'))
+const LeaveRequests = lazy(() => import('../pages/leave-requests/LeaveRequestBase'))
 
 export interface Route {
   path: string;

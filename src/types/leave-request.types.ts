@@ -1,4 +1,4 @@
-export type LeaveType = "Vacation" | "Sick" | "Personal" | "Other";
+export type LeaveType = "Vacation" | "Sick Leave" | "Personal" | "Other";
 export type LeaveStatus = "Pending" | "Approved" | "Rejected";
 
 export interface LeaveRequestCreate {

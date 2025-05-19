@@ -7,6 +7,7 @@ import {
   Typography
 } from '@mui/material';
 import useLeaveRequests from '../../api/hooks/leave-requests/useLeaveRequests';
+import { LeaveRequestResponse } from '../../types/leave-request.types';
 import { useDeleteLeaveRequest } from '../../api/hooks/leave-requests/useDeleteLeaveRequest';
 
 export default function LeaveRequestList() {
@@ -24,7 +25,7 @@ export default function LeaveRequestList() {
         All Leave Requests
       </Typography>
       <Stack spacing={2}>
-        {(data?.items || []).map((req) => (
+        {(data?.items || []).map((req: LeaveRequestResponse) => (
           <Card key={req.id} sx={{ p: 2 }}>
             <Stack spacing={1}>
               <Typography><strong>{req.leave_type}</strong> from {req.start_date} to {req.end_date}</Typography>
@@ -47,3 +48,4 @@ export default function LeaveRequestList() {
     </Container>
   );
 }
+

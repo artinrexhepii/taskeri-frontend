@@ -13,6 +13,7 @@ import {
 import { LeaveRequestCreate, LeaveType } from '../../types/leave-request.types';
 import { useCreateLeaveRequest } from '../../api/hooks/leave-requests/useCreateLeaveRequest';
 
+
 export default function LeaveRequestForm() {
   const navigate = useNavigate();
   const createLeaveRequest = useCreateLeaveRequest();
@@ -79,7 +80,7 @@ export default function LeaveRequestForm() {
                 value={formData.leave_type}
                 onChange={handleChange('leave_type')}
               >
-                {['Vacation', 'Sick', 'Personal', 'Other'].map((type) => (
+                {['Vacation', 'Sick Leave', 'Personal', 'Other'].map((type) => (
                   <MenuItem key={type} value={type}>
                     {type}
                   </MenuItem>

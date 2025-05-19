@@ -9,6 +9,7 @@ import {
 import { useUserLeaveRequests } from '../../api/hooks/leave-requests/useUserLeaveRequests';
 import { useDeleteLeaveRequest } from '../../api/hooks/leave-requests/useDeleteLeaveRequest';
 
+
 export default function UserLeaveRequests() {
   const userId = 1; // Replace with auth context or prop
   const { data } = useUserLeaveRequests(userId);
