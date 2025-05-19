@@ -4,12 +4,12 @@ import {
   Button,
   Card,
   Chip,
+  MenuItem,
   Stack,
   Tab,
   Tabs,
   TextField,
   Typography,
-  MenuItem,
 } from '@mui/material';
 import { format } from 'date-fns';
 import { useInvoices } from '../../api/hooks/invoices/useInvoices';
@@ -18,6 +18,7 @@ import { useCreateInvoice } from '../../api/hooks/invoices/useCreateInvoice';
 import { useUpdateInvoice } from '../../api/hooks/invoices/useUpdateInvoice';
 import { useDeleteInvoice } from '../../api/hooks/invoices/useDeleteInvoice';
 import { InvoiceCreate, InvoiceUpdate, InvoiceStatus } from '../../types/invoice.types';
+import { useCompany } from '../../api/hooks/companies/useCompany';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -57,13 +58,26 @@ export default function Invoices() {
   const createInvoice = useCreateInvoice();
   const deleteInvoice = useDeleteInvoice();
   const updateInvoice = useUpdateInvoice(selectedInvoiceId ?? 0);
+  const companyQuery = useCompany();
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
+    if (newValue === 1) {
+setFormCreate({
+  company_id: 0,
+  amount: 0,
+  status: 'Pending',
+});    }
   };
 
   const handleCreateSubmit = () => {
-    createInvoice.mutate(formCreate);
+    const companyId = companyQuery.data?.[0]?.id;
+    if (!companyId) return;
+
+    createInvoice.mutate({
+      ...formCreate,
+      company_id: companyId,
+    });
   };
 
   const handleUpdateSubmit = () => {
@@ -109,7 +123,10 @@ export default function Invoices() {
                       <Button
                         size="small"
                         variant="outlined"
-                        onClick={() => setSelectedInvoiceId(inv.id)}
+                        onClick={() => {
+                          setSelectedInvoiceId(inv.id);
+                          setTabValue(2); // Switch to View tab
+                        }}
                       >
                         View
                       </Button>
@@ -117,7 +134,10 @@ export default function Invoices() {
                         size="small"
                         variant="outlined"
                         color="warning"
-                        onClick={() => setSelectedInvoiceId(inv.id)}
+                        onClick={() => {
+                          setSelectedInvoiceId(inv.id);
+                          setTabValue(3); // Switch to Update tab
+                        }}
                       >
                         Update
                       </Button>
@@ -140,14 +160,29 @@ export default function Invoices() {
         {/* Tab 1: Create Invoice */}
         <TabPanel value={tabValue} index={1}>
           <Stack spacing={2}>
+            {companyQuery.isLoading ? (
+            <Typography>Loading companies...</Typography>
+            ) : (
             <TextField
-              label="Company ID"
-              type="number"
-              value={formCreate.company_id}
-              onChange={(e) =>
-                setFormCreate((prev) => ({ ...prev, company_id: Number(e.target.value) }))
-              }
-            />
+                select
+                label="Select Company"
+                value={formCreate.company_id}
+                onChange={(e) =>
+                setFormCreate((prev) => ({
+                    ...prev,
+                    company_id: Number(e.target.value),
+                }))
+                }
+            >
+                {companyQuery.data?.map((company) => (
+                <MenuItem key={company.id} value={company.id}>
+                    Company #{company.id}
+                </MenuItem>
+                ))}
+            </TextField>
+            )}
+
+
             <TextField
               label="Amount"
               type="number"
@@ -156,6 +191,7 @@ export default function Invoices() {
                 setFormCreate((prev) => ({ ...prev, amount: Number(e.target.value) }))
               }
             />
+
             <TextField
               select
               label="Status"
@@ -167,6 +203,7 @@ export default function Invoices() {
               <MenuItem value="Pending">Pending</MenuItem>
               <MenuItem value="Paid">Paid</MenuItem>
             </TextField>
+
             <Button variant="contained" onClick={handleCreateSubmit}>
               Create Invoice
             </Button>
@@ -175,36 +212,53 @@ export default function Invoices() {
 
         {/* Tab 2: View Invoice */}
         <TabPanel value={tabValue} index={2}>
-          <TextField
-            label="Invoice ID"
-            type="number"
-            value={selectedInvoiceId ?? ''}
-            onChange={(e) => setSelectedInvoiceId(Number(e.target.value))}
-            sx={{ mb: 2 }}
-          />
-          {invoiceQuery.isLoading ? (
-            <Typography>Loading invoice...</Typography>
-          ) : invoiceQuery.data ? (
-            <Card sx={{ p: 2 }}>
-              <Typography>Invoice #{invoiceQuery.data.id}</Typography>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>Select an invoice to view:</Typography>
+          <Stack spacing={2}>
+            {invoicesQuery.data?.map((inv) => (
+              <Card
+                key={inv.id}
+                sx={{
+                  p: 2,
+                  cursor: 'pointer',
+                  background: selectedInvoiceId === inv.id ? '#f0f0f0' : 'inherit',
+                }}
+                onClick={() => setSelectedInvoiceId(inv.id)}
+              >
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography>Invoice #{inv.id}</Typography>
+                  <Typography>€{inv.amount.toFixed(2)}</Typography>
+                </Stack>
+                <Typography variant="body2">Status: {inv.status}</Typography>
+              </Card>
+            ))}
+          </Stack>
+
+          {selectedInvoiceId && invoiceQuery.data && (
+            <Card sx={{ mt: 3, p: 2 }}>
+              <Typography variant="h6">Invoice Details</Typography>
               <Typography>Company ID: {invoiceQuery.data.company_id}</Typography>
               <Typography>Amount: €{invoiceQuery.data.amount.toFixed(2)}</Typography>
               <Typography>Issued: {format(new Date(invoiceQuery.data.issued_at), 'yyyy-MM-dd')}</Typography>
               <Typography>Status: {invoiceQuery.data.status}</Typography>
             </Card>
-          ) : (
-            <Typography>No invoice found.</Typography>
           )}
         </TabPanel>
 
         {/* Tab 3: Update Invoice */}
         <TabPanel value={tabValue} index={3}>
           <TextField
-            label="Invoice ID"
-            type="number"
+            select
+            label="Select Invoice to Update"
             value={selectedInvoiceId ?? ''}
             onChange={(e) => setSelectedInvoiceId(Number(e.target.value))}
-          />
+          >
+            {invoicesQuery.data?.map((inv) => (
+              <MenuItem key={inv.id} value={inv.id}>
+                Invoice #{inv.id} – €{inv.amount}
+              </MenuItem>
+            ))}
+          </TextField>
+
           <Stack spacing={2} sx={{ mt: 2 }}>
             <TextField
               label="Amount"
@@ -225,7 +279,11 @@ export default function Invoices() {
               <MenuItem value="Pending">Pending</MenuItem>
               <MenuItem value="Paid">Paid</MenuItem>
             </TextField>
-            <Button variant="contained" onClick={handleUpdateSubmit} disabled={!selectedInvoiceId}>
+            <Button
+              variant="contained"
+              onClick={handleUpdateSubmit}
+              disabled={!selectedInvoiceId}
+            >
               Update Invoice
             </Button>
           </Stack>
