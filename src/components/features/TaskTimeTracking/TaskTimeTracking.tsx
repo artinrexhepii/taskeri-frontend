@@ -34,7 +34,6 @@ interface TaskTimeTrackingProps {
 }
 
 export default function TaskTimeTracking({ taskId }: TaskTimeTrackingProps) {
-  const [description, setDescription] = useState('');
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
   const { data: timeEntriesData } = useTaskTimeLogs(taskId);
@@ -42,7 +41,7 @@ export default function TaskTimeTracking({ taskId }: TaskTimeTrackingProps) {
   const { mutate: deleteTimeEntry } = useDeleteTimeLog();
 
   const handleCreateEntry = () => {
-    if (!startTime || !endTime || !description.trim()) return;
+    if (!startTime || !endTime) return;
 
     const duration = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
 
@@ -59,7 +58,6 @@ export default function TaskTimeTracking({ taskId }: TaskTimeTrackingProps) {
 
     setStartTime(null);
     setEndTime(null);
-    setDescription('');
   };
 
 
@@ -87,12 +85,6 @@ export default function TaskTimeTracking({ taskId }: TaskTimeTrackingProps) {
       <Card sx={{ p: 2 }}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <Stack spacing={2}>
-            <TextField
-              fullWidth
-              label="Description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
             <DateTimePicker
               label="Start Time"
               value={startTime ? dayjs(startTime) : null}
@@ -106,7 +98,7 @@ export default function TaskTimeTracking({ taskId }: TaskTimeTrackingProps) {
             <Button
               variant="contained"
               onClick={handleCreateEntry}
-              disabled={!description.trim() || !startTime || !endTime}
+              disabled={!startTime || !endTime}
             >
               Save Time Entry
             </Button>
