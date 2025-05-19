@@ -82,19 +82,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       {/* Mobile backdrop */}
       {isOpen && (
         <div 
-          className="sidebar-mobile md:hidden"
+          className="fixed inset-0 bg-black/50 md:hidden z-40"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
       <aside className={`
-        sidebar
+        fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800
+        transform transition-transform duration-200 ease-in-out
+        shadow-lg z-50
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         md:translate-x-0
       `}>
         {/* Logo */}
-        <div className="p-4 border-b border-border">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <img 
             src="/logo.svg" 
             alt="Taskeri" 
@@ -103,16 +105,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="mt-4">
+        <nav className="mt-4 px-2">
           {filteredNavItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
               className={`
-                flex items-center px-4 py-2 mx-2 rounded-md
+                flex items-center px-4 py-2 rounded-md mb-1
                 hover:bg-primary/5 hover:text-primary
                 transition-colors
-                ${isActive(item.path) ? 'bg-primary/10 text-primary' : 'text-text-secondary'}
+                ${isActive(item.path) ? 'bg-primary/10 text-primary' : 'text-gray-600 dark:text-gray-300'}
               `}
               onClick={() => onClose()}
             >
@@ -123,12 +125,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </nav>
 
         {/* User section */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <div className="flex items-center">
-            
             <div className="ml-3">
-              <p className="text-sm font-medium text-text-primary">{user?.first_name}</p>
-              <p className="text-xs text-text-secondary">{user?.email}</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.first_name}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</p>
             </div>
           </div>
         </div>

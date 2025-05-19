@@ -7,17 +7,21 @@ const MainLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background-main">
-      <Sidebar 
-        isOpen={isSidebarOpen} 
-        onClose={() => setIsSidebarOpen(false)} 
-      />
-      
-      <div className="flex flex-col md:pl-64">
+    <div className="min-h-screen bg-background-main flex">
+      {/* Sidebar */}
+      <div className="fixed inset-y-0 left-0 z-50">
+        <Sidebar 
+          isOpen={isSidebarOpen} 
+          onClose={() => setIsSidebarOpen(false)} 
+        />
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 md:ml-64">
         <Header onMenuClick={() => setIsSidebarOpen(true)} />
         
-        <main className="flex-1">
-          <div className="main-content">
+        <main className="p-6">
+          <div className="max-w-7xl mx-auto">
             <Outlet />
           </div>
         </main>
