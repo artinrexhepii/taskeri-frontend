@@ -1,4 +1,5 @@
 import { lazy } from 'react';
+import LeaveRequestForm from '../pages/leave-requests/LeaveRequestForm';
 
 // Lazy load page components
 const Login = lazy(() => import('../pages/auth/Login'));
@@ -22,6 +23,7 @@ const TimeTracking = lazy(() => import('../pages/time-tracking/TimeTracking'));
 const Reports = lazy(() => import('../pages/reports/Reports'));
 const Settings = lazy(() => import('../pages/settings/Settings'));
 const FileAttachments = lazy(() => import('../pages/file-attachments/FileAttachments'));
+const LeaveRequests = lazy(() => import('../pages/leave-requests/LeaveRequestForm'))
 
 export interface Route {
   path: string;
@@ -163,6 +165,12 @@ export const routes: Routes = {
   attachments: {
     path: '/attachments',
     component: FileAttachments,
+    protected: true
+  },
+
+  leaveRequests:{
+    path: '/leave-requests',
+    component: LeaveRequests,
     protected: true
   }
 };

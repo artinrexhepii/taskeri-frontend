@@ -26,3 +26,10 @@ export interface LeaveRequestResponse {
   status: LeaveStatus;
   created_at: string;
 }
+
+export interface LeaveRequestListResponse {
+  items: LeaveRequestResponse[];
+  total: number;
+  page: number;
+  pagesize: number;
+}
