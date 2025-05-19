@@ -5,7 +5,7 @@ import { useUpdateTask } from '../../api/hooks/tasks/useUpdateTask';
 import { useDeleteTask } from '../../api/hooks/tasks/useDeleteTask';
 import { useProjects } from '../../api/hooks/projects/useProjects';
 import { useUsers } from '../../api/hooks/users/useUsers';
-import { TaskStatus, TaskPriority } from '../../types/task.types';
+import { TaskStatus, TaskPriority, TaskUpdate } from '../../types/task.types';
 import Card from '../../components/common/Card/Card';
 import Badge from '../../components/common/Badge/Badge';
 import Button from '../../components/common/Button/Button';
@@ -24,6 +24,11 @@ import {
   Typography,
   Tabs,
   Tab,
+  TextField,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 
@@ -66,6 +71,15 @@ const TaskDetail: React.FC = () => {
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
   const { data: tasksData } = useTasks();
+  const [editFormData, setEditFormData] = useState<TaskUpdate>({
+    name: '',
+    description: '',
+    status: TaskStatus.TODO,
+    priority: TaskPriority.MEDIUM,
+    due_date: '',
+    project_id: undefined,
+    assigned_user_ids: [],
+  });
 
   useEffect(() => {
     if (id) {
@@ -74,12 +88,36 @@ const TaskDetail: React.FC = () => {
     }
   }, [id, tasksData]);
 
+  useEffect(() => {
+    if (task) {
+      setEditFormData({
+        name: task.name,
+        description: task.description || '',
+        status: task.status,
+        priority: task.priority,
+        due_date: task.due_date || '',
+        project_id: task.project_id,
+        assigned_user_ids: task.assigned_users || [],
+      });
+    }
+  }, [task]);
+
   const handleStatusChange = async (status: TaskStatus) => {
     try {
       await updateTask.mutateAsync({ id: taskId, taskData: { status } });
       showNotification('success','Success','Task status updated successfully');
     } catch (error) {
       showNotification('error', 'Error', 'Failed to update task status');
+    }
+  };
+
+  const handleEditSubmit = async () => {
+    try {
+      await updateTask.mutateAsync({ id: taskId, taskData: editFormData });
+      showNotification('success', 'Success', 'Task updated successfully');
+      setIsEditModalOpen(false);
+    } catch (error) {
+      showNotification('error', 'Error', 'Failed to update task');
     }
   };
 
@@ -345,10 +383,120 @@ const TaskDetail: React.FC = () => {
         </div>
       </Modal>
 
-      {/* Edit Modal would go here */}
+      {/* Edit Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Edit Task"
+      >
+        <div className="p-6">
+          <Stack spacing={3}>
+            <TextField
+              fullWidth
+              label="Task Name"
+              value={editFormData.name}
+              onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
+            />
+
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              label="Description"
+              value={editFormData.description}
+              onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
+            />
+
+            <FormControl fullWidth>
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={editFormData.status}
+                label="Status"
+                onChange={(e) => setEditFormData(prev => ({ ...prev, status: e.target.value as TaskStatus }))}
+              >
+                {Object.values(TaskStatus).map((status) => (
+                  <MenuItem key={status} value={status}>
+                    {status}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth>
+              <InputLabel>Priority</InputLabel>
+              <Select
+                value={editFormData.priority}
+                label="Priority"
+                onChange={(e) => setEditFormData(prev => ({ ...prev, priority: e.target.value as TaskPriority }))}
+              >
+                {Object.values(TaskPriority).map((priority) => (
+                  <MenuItem key={priority} value={priority}>
+                    {priority}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <TextField
+              fullWidth
+              type="date"
+              label="Due Date"
+              value={editFormData.due_date}
+              onChange={(e) => setEditFormData(prev => ({ ...prev, due_date: e.target.value }))}
+              InputLabelProps={{ shrink: true }}
+            />
+
+            <FormControl fullWidth>
+              <InputLabel>Project</InputLabel>
+              <Select
+                value={editFormData.project_id || ''}
+                label="Project"
+                onChange={(e) => setEditFormData(prev => ({ ...prev, project_id: Number(e.target.value) }))}
+              >
+                {projects.map((project) => (
+                  <MenuItem key={project.id} value={project.id}>
+                    {project.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth>
+              <InputLabel>Assigned Users</InputLabel>
+              <Select
+                multiple
+                value={editFormData.assigned_user_ids || []}
+                label="Assigned Users"
+                onChange={(e) => setEditFormData(prev => ({ ...prev, assigned_user_ids: e.target.value as number[] }))}
+              >
+                {users.map((user) => (
+                  <MenuItem key={user.id} value={user.id}>
+                    {`${user.first_name} ${user.last_name}`}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsEditModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleEditSubmit}
+                isLoading={updateTask.isPending}
+              >
+                Save Changes
+              </Button>
+            </div>
+          </Stack>
+        </div>
+      </Modal>
     </div>
   );
 };
-
 
 export default TaskDetail;
