@@ -23,6 +23,11 @@ import { format } from 'date-fns';
 import { useTaskTimeLogs } from '../../../api/hooks/time-logs/useTaskTimeLogs';
 import { useCreateTimeLog } from '../../../api/hooks/time-logs/useCreateTimeLog';
 import { useDeleteTimeLog } from '../../../api/hooks/time-logs/useDeleteTimeLog';
+import dayjs from 'dayjs';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+
 
 interface TaskTimeTrackingProps {
   taskId: number;
@@ -30,22 +35,21 @@ interface TaskTimeTrackingProps {
 
 export default function TaskTimeTracking({ taskId }: TaskTimeTrackingProps) {
   const [description, setDescription] = useState('');
-  const [isTracking, setIsTracking] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
+  const [endTime, setEndTime] = useState<Date | null>(null);
   const { data: timeEntriesData } = useTaskTimeLogs(taskId);
   const { mutate: createTimeEntry } = useCreateTimeLog();
   const { mutate: deleteTimeEntry } = useDeleteTimeLog();
 
-  const handleStartTracking = () => {
-    setIsTracking(true);
-    setStartTime(new Date());
-  };
+  const handleCreateEntry = () => {
+    if (!startTime || !endTime || !description.trim()) return;
 
-  const handleStopTracking = () => {
-    if (!startTime) return;
-
-    const endTime = new Date();
     const duration = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
+
+    if (duration <= 0) {
+      alert("End time must be after start time.");
+      return;
+    }
 
     createTimeEntry({
       task_id: taskId,
@@ -53,10 +57,11 @@ export default function TaskTimeTracking({ taskId }: TaskTimeTrackingProps) {
       end_time: endTime.toISOString(),
     });
 
-    setIsTracking(false);
     setStartTime(null);
+    setEndTime(null);
     setDescription('');
   };
+
 
   const handleDelete = (entryId: number) => {
     if (window.confirm('Are you sure you want to delete this time entry?')) {
@@ -80,37 +85,35 @@ export default function TaskTimeTracking({ taskId }: TaskTimeTrackingProps) {
   return (
     <Stack spacing={3}>
       <Card sx={{ p: 2 }}>
-        <Stack spacing={2}>
-          <TextField
-            fullWidth
-            label="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            disabled={isTracking}
-          />
-          <Box>
-            {!isTracking ? (
-              <Button
-                variant="contained"
-                startIcon={<PlayIcon />}
-                onClick={handleStartTracking}
-                disabled={!description.trim()}
-              >
-                Start Tracking
-              </Button>
-            ) : (
-              <Button
-                variant="contained"
-                color="error"
-                startIcon={<StopIcon />}
-                onClick={handleStopTracking}
-              >
-                Stop Tracking
-              </Button>
-            )}
-          </Box>
-        </Stack>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <Stack spacing={2}>
+            <TextField
+              fullWidth
+              label="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+            <DateTimePicker
+              label="Start Time"
+              value={startTime ? dayjs(startTime) : null}
+              onChange={(newValue) => setStartTime(newValue ? newValue.toDate() : null)}
+            />
+            <DateTimePicker
+              label="End Time"
+              value={endTime ? dayjs(endTime) : null}
+              onChange={(newValue) => setEndTime(newValue ? newValue.toDate() : null)}
+            />
+            <Button
+              variant="contained"
+              onClick={handleCreateEntry}
+              disabled={!description.trim() || !startTime || !endTime}
+            >
+              Save Time Entry
+            </Button>
+          </Stack>
+        </LocalizationProvider>
       </Card>
+
 
       <TableContainer>
         <Table>
