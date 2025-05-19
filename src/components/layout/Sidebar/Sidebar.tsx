@@ -10,6 +10,7 @@ import {
   CogIcon,
   BuildingOfficeIcon 
 } from '@heroicons/react/24/outline';
+import { BanknotesIcon } from '@heroicons/react/24/outline';
 import { getPath } from '../../../routes/routes';
 import { useAuth } from '../../../context/AuthContext';
 
@@ -29,7 +30,8 @@ const navItems: NavItem[] = [
   { name: 'Reports', path: getPath('reports'), icon: ChartBarIcon },
   { name: 'Company Users', path: '/company/users', icon: BuildingOfficeIcon },
   { name: 'Settings', path: getPath('settings'), icon: CogIcon },
-  { name: 'Leave Requests', path: getPath('leaveRequests'), icon: HomeIcon }
+  { name: 'Leave Requests', path: getPath('leaveRequests'), icon: HomeIcon },
+  { name: 'Invoices', path: getPath('invoices'), icon: BanknotesIcon }
 ];
 
 interface SidebarProps {
