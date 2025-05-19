@@ -174,6 +174,12 @@ export const routes: Routes = {
     path: '/leave-requests',
     component: LeaveRequests,
     protected: true
+  },
+
+  invoices:{
+    path: '/invoices',
+    component: Invoices,
+    protected: true
   }
 };
 
