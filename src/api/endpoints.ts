@@ -3,7 +3,7 @@ export const API_ENDPOINTS = {
     AUTH: {
       LOGIN: '/token',
       REFRESH: '/token/refresh',
-      REGISTER_TENANT: '/tenants/register',
+      REGISTER_TENANT: '/tenant-users/',
     },
     
     // User endpoints
