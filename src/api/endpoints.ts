@@ -3,6 +3,7 @@ export const API_ENDPOINTS = {
     AUTH: {
       LOGIN: '/token',
       REFRESH: '/token/refresh',
+      REGISTER_TENANT: '/tenants/register',
     },
     
     // User endpoints
@@ -136,4 +137,11 @@ export const API_ENDPOINTS = {
       BASE: '/notifications',
       MARK_READ: (id: number) => `/notifications/${id}/read`,
     },
+
+    TENANTS: {
+        BASE: '/tenants',
+        DETAIL: (id: number) => `/tenants/${id}`,
+        USERS: (tenantId: number) => `/tenants/${tenantId}/users`,
+        ADD_USER: (tenantId: number) => `/tenants/${tenantId}/users`,
+      },
   };
