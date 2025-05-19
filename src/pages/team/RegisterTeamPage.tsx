@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useNotification } from '../../context/NotificationContext';
+import { useCreateTeam } from '../../api/hooks/teams/useCreateTeam';
+import { TeamCreate } from '../../types/team.types';
 import Button from '../../components/common/Button/Button';
 import Input from '../../components/common/Input/Input';
 
@@ -15,12 +17,16 @@ const RegisterTeamPage: React.FC = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<TeamFormData>();
+  const createTeamMutation = useCreateTeam();
 
   const onSubmit = async (data: TeamFormData) => {
     try {
       setIsLoading(true);
-      // Simulate API call to register team
-      console.log('Team registered:', data);
+      const teamCreateData: TeamCreate = {
+        name: data.name,
+        department_id: parseInt(data.departmentId),
+      };
+      await createTeamMutation.mutateAsync(teamCreateData);
       showNotification('success', 'Team Registered', 'Your team has been successfully registered.');
       navigate('/register-user'); // Navigate to user registration
     } catch (error) {

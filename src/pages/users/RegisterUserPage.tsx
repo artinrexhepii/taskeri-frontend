@@ -1,26 +1,39 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNotification } from '../../context/NotificationContext';
+import { useCreateUser } from '../../api/hooks/users/useCreateUser';
+import { UserCreate } from '../../types/user.types';
 import Button from '../../components/common/Button/Button';
 import Input from '../../components/common/Input/Input';
 
 interface UserFormData {
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
   role: string;
   teamId: string;
+  department_id: string;
 }
 
 const RegisterUserPage: React.FC = () => {
   const { showNotification } = useNotification();
   const [isLoading, setIsLoading] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<UserFormData>();
+  const createUserMutation = useCreateUser();
 
   const onSubmit = async (data: UserFormData) => {
     try {
       setIsLoading(true);
-      // Simulate API call to register user
-      console.log('User registered:', data);
+      const userCreateData: UserCreate = {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        role_id: parseInt(data.role),
+        team_id: parseInt(data.teamId),
+        department_id: parseInt(data.department_id),
+        password: '12345678',
+      };
+      await createUserMutation.mutateAsync(userCreateData);
       showNotification('success', 'User Registered', 'The user has been successfully registered.');
     } catch (error) {
       showNotification('error', 'Registration Failed', 'An error occurred while registering the user.');
@@ -38,9 +51,14 @@ const RegisterUserPage: React.FC = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="rounded-md shadow-sm -space-y-px">
             <Input
-              label="Name"
-              {...register('name', { required: 'Name is required' })}
-              error={errors.name?.message}
+              label="First Name"
+              {...register('first_name', { required: 'First name is required' })}
+              error={errors.first_name?.message}
+            />
+            <Input
+              label="Last Name"
+              {...register('last_name', { required: 'Last name is required' })}
+              error={errors.last_name?.message}
             />
             <Input
               label="Email"
@@ -57,6 +75,11 @@ const RegisterUserPage: React.FC = () => {
               label="Team ID"
               {...register('teamId', { required: 'Team ID is required' })}
               error={errors.teamId?.message}
+            />
+            <Input
+              label="Department ID"
+              {...register('department_id', { required: 'Department ID is required' })}
+              error={errors.department_id?.message}
             />
           </div>
           <div>

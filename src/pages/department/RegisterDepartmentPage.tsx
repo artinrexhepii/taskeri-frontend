@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useNotification } from '../../context/NotificationContext';
+import { useCreateDepartment } from '../../api/hooks/departments/useCreateDepartment';
+import { DepartmentCreate } from '../../types/department.types';
 import Button from '../../components/common/Button/Button';
 import Input from '../../components/common/Input/Input';
 
@@ -15,12 +17,16 @@ const RegisterDepartmentPage: React.FC = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<DepartmentFormData>();
+  const createDepartmentMutation = useCreateDepartment();
 
   const onSubmit = async (data: DepartmentFormData) => {
     try {
       setIsLoading(true);
-      // Simulate API call to register department
-      console.log('Department registered:', data);
+      const departmentCreateData: DepartmentCreate = {
+        name: data.name,
+        company_id: parseInt(data.companyId),
+      };
+      await createDepartmentMutation.mutateAsync(departmentCreateData);
       showNotification('success', 'Department Registered', 'Your department has been successfully registered.');
       navigate('/register-team'); // Navigate to team registration
     } catch (error) {

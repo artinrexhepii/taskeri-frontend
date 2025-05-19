@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useNotification } from '../../context/NotificationContext';
+import { useCreateCompany } from '../../api/hooks/companies/useCreateCompany';
 import Button from '../../components/common/Button/Button';
 import Input from '../../components/common/Input/Input';
 
@@ -16,12 +17,12 @@ const RegisterCompanyPage: React.FC = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<CompanyFormData>();
+  const createCompanyMutation = useCreateCompany();
 
   const onSubmit = async (data: CompanyFormData) => {
     try {
       setIsLoading(true);
-      // Simulate API call to register company
-      console.log('Company registered:', data);
+      await createCompanyMutation.mutateAsync(data);
       showNotification('success', 'Company Registered', 'Your company has been successfully registered.');
       navigate('/register-department'); // Navigate to department registration
     } catch (error) {
