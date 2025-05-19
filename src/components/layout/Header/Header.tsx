@@ -26,13 +26,13 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const fullName = user ? formatUserName(user.first_name, user.last_name) : '';
 
   return (
-    <header className="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <header className="sticky top-0 z-40 bg-primary text-white dark:bg-gray-800 border-b border-primary-600 dark:border-gray-700 shadow-md">
       <div className="flex items-center justify-between h-16 px-4">
         {/* Left section */}
         <div className="flex items-center md:w-72">
           <button
             onClick={onMenuClick}
-            className="p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 md:hidden"
+            className="p-2 rounded-md text-white hover:bg-primary-dark dark:text-gray-400 dark:hover:bg-gray-700 md:hidden"
           >
             <Bars3Icon className="h-6 w-6" />
           </button>
@@ -40,11 +40,11 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           {/* Search bar - hidden on mobile */}
           <div className="hidden md:flex items-center flex-1 ml-4">
             <div className="relative w-full">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/60" />
               <input
                 type="text"
                 placeholder="Search..."
-                className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="w-full pl-10 pr-4 py-2 text-sm border border-primary-light/30 dark:border-gray-700 rounded-md bg-white/10 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent text-white placeholder-white/70"
               />
             </div>
           </div>
@@ -54,10 +54,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         <div className="flex items-center space-x-4">
           {/* Notifications */}
           <div className="relative">
-            <button className="p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700">
+            <button className="p-2 rounded-md text-white hover:bg-primary-dark dark:text-gray-400 dark:hover:bg-gray-700">
               <BellIcon className="h-6 w-6" />
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 h-4 w-4 text-xs font-medium flex items-center justify-center bg-primary text-white rounded-full">
+                <span className="absolute top-1 right-1 h-4 w-4 text-xs font-medium flex items-center justify-center bg-red-500 text-white rounded-full">
                   {unreadCount}
                 </span>
               )}
@@ -68,12 +68,12 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           <div className="relative">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="flex items-center space-x-3 p-2 rounded-md hover:bg-primary-dark dark:hover:bg-gray-700"
             >
-              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <UserCircleIcon className="h-6 w-6 text-primary" />
+              <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
+                <UserCircleIcon className="h-6 w-6 text-white" />
               </div>
-              <span className="hidden md:block text-sm font-medium text-gray-900 dark:text-white">
+              <span className="hidden md:block text-sm font-medium text-white dark:text-white">
                 {fullName}
               </span>
             </button>
@@ -115,11 +115,11 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
       {/* Mobile search bar */}
       <div className="md:hidden px-4 pb-3">
         <div className="relative">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/70" />
           <input
             type="text"
             placeholder="Search..."
-            className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            className="w-full pl-10 pr-4 py-2 text-sm border border-primary-light/30 dark:border-gray-700 rounded-md bg-white/10 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent text-white placeholder-white/70"
           />
         </div>
       </div>

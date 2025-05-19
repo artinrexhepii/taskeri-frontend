@@ -22,10 +22,27 @@ export const getTenantUsers = async (
   page = 1,
   pageSize = 10
 ): Promise<TenantUserListResponse> => {
-  const response = await apiClient.get<TenantUserListResponse>(
-    `${API_ENDPOINTS.TENANTS.USERS(tenantId)}?page=${page}&page_size=${pageSize}`
-  );
-  return response;
+  const response = await apiClient.get<any[]>(`/users`);
+  // Transform the array response into the expected format
+  return {
+    items: response.map(user => ({
+      id: user.id,
+      user_id: user.id,
+      tenant_id: tenantId,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      user: {
+        id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email
+      }
+    })),
+    total: response.length,
+    page: 1,
+    page_size: response.length
+  };
 };
 
 /**

@@ -35,6 +35,7 @@ export interface UserDetails {
   department_id: number | null;
   team_id: number | null;
   tenant_schema?: string;
+  tenant_id?: number;
   is_active?: boolean;
   roles?: RoleResponse[];
   permissions?: string[];

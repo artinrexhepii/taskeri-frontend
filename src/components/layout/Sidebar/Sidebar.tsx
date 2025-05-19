@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   HomeIcon, 
@@ -27,13 +27,7 @@ const navItems: NavItem[] = [
   { name: 'Teams', path: getPath('teams'), icon: UsersIcon },
   { name: 'Time Tracking', path: getPath('timeTracking'), icon: ClockIcon },
   { name: 'Reports', path: getPath('reports'), icon: ChartBarIcon },
-  // Company Management - only visible to tenant admins
-  { 
-    name: 'Company Users', 
-    path: '/company/users', 
-    icon: BuildingOfficeIcon,
-    requiresPermission: ['tenant_admin']
-  },
+  { name: 'Company Users', path: '/company/users', icon: BuildingOfficeIcon },
   { name: 'Settings', path: getPath('settings'), icon: CogIcon },
 ];
 
@@ -46,36 +40,29 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
   const { user } = useAuth();
 
+  // Debug log to show user roles when component mounts
+  useEffect(() => {
+    if (user) {
+      console.log('Current user:', user);
+      console.log('User roles:', user?.roles);
+      
+      if (user?.roles && user.roles.length > 0) {
+        console.log('User has the following roles:');
+        user.roles.forEach((role, index) => {
+          console.log(`Role ${index + 1}: ${role.name} (ID: ${role.id})`);
+        });
+      } else {
+        console.log('User has no roles assigned');
+      }
+      
+      console.log('User permissions:', user?.permissions);
+    }
+  }, [user]);
+
   const isActive = (path: string) => {
     return location.pathname === path ||
       (path !== '/' && location.pathname.startsWith(path));
   };
-
-  // Check if user has a specific permission
-  const hasPermission = (requiredPermissions?: string[]): boolean => {
-    if (!requiredPermissions || requiredPermissions.length === 0) return true;
-    if (!user?.permissions) return false;
-    
-    return requiredPermissions.some(permission => 
-      user.permissions?.includes(permission)
-    );
-  };
-
-  // Determine if the user is a tenant admin
-  // This could be based on specific permissions, roles, or other criteria
-  const isTenantAdmin = user?.roles?.some(role => 
-    role.name.toLowerCase().includes('admin')
-  ) || hasPermission(['tenant_admin', 'manage_users']);
-
-  // Filter navigation items based on permissions
-  const filteredNavItems = navItems.filter(item => {
-    // If item requires tenant admin permission, check if user is admin
-    if (item.requiresPermission?.includes('tenant_admin')) {
-      return isTenantAdmin;
-    }
-    // Otherwise check for specific permissions
-    return hasPermission(item.requiresPermission);
-  });
 
   return (
     <>
@@ -104,9 +91,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           />
         </div>
 
-        {/* Navigation */}
+        {/* Navigation - Now showing all items without filtering */}
         <nav className="mt-4 px-2">
-          {filteredNavItems.map((item) => (
+          {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
@@ -124,12 +111,31 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           ))}
         </nav>
 
-        {/* User section */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-          <div className="flex items-center">
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.first_name}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</p>
+        {/* User section with role information */}
+        <div className="absolute bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+          {/* Role information - for debugging */}
+          <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900">
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Current Role(s)</h4>
+            <div className="mt-1 max-h-24 overflow-y-auto">
+              {user?.roles && user.roles.length > 0 ? (
+                user.roles.map(role => (
+                  <div key={role.id} className="text-xs py-1 px-2 my-1 bg-primary/10 text-primary rounded">
+                    {role.name}
+                  </div>
+                ))
+              ) : (
+                <span className="text-xs text-gray-500">No roles assigned</span>
+              )}
+            </div>
+          </div>
+          
+          {/* User info */}
+          <div className="p-4">
+            <div className="flex items-center">
+              <div>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.first_name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</p>
+              </div>
             </div>
           </div>
         </div>
