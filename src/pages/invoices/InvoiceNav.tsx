@@ -17,7 +17,7 @@ import { useInvoice } from '../../api/hooks/invoices/useInvoice';
 import { useCreateInvoice } from '../../api/hooks/invoices/useCreateInvoice';
 import { useUpdateInvoice } from '../../api/hooks/invoices/useUpdateInvoice';
 import { useDeleteInvoice } from '../../api/hooks/invoices/useDeleteInvoice';
-import { InvoiceCreate, InvoiceUpdate, InvoiceStatus } from '../../types/invoice.types';
+import { InvoiceUpdate, InvoiceStatus } from '../../types/invoice.types';
 import { useCompany } from '../../api/hooks/companies/useCompany';
 
 interface TabPanelProps {
@@ -43,11 +43,16 @@ function TabPanel({ children, value, index, ...other }: TabPanelProps) {
 export default function Invoices() {
   const [tabValue, setTabValue] = useState(0);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
-  const [formCreate, setFormCreate] = useState<InvoiceCreate>({
+  const [formCreate, setFormCreate] = useState<{
+    company_id: number;
+    amount: string;
+    status: InvoiceStatus;
+  }>({
     company_id: 0,
-    amount: 0,
+    amount: '',
     status: 'Pending',
   });
+
   const [formUpdate, setFormUpdate] = useState<InvoiceUpdate>({
     amount: undefined,
     status: undefined,
@@ -63,20 +68,22 @@ export default function Invoices() {
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
     if (newValue === 1) {
-setFormCreate({
-  company_id: 0,
-  amount: 0,
-  status: 'Pending',
-});    }
+      setFormCreate({
+        company_id: 0,
+        amount: '',
+        status: 'Pending',
+      });
+    }
   };
 
   const handleCreateSubmit = () => {
-    const companyId = companyQuery.data?.[0]?.id;
-    if (!companyId) return;
+    const companyId = formCreate.company_id || companyQuery.data?.[0]?.id;
+    if (!companyId || formCreate.amount === '') return;
 
     createInvoice.mutate({
-      ...formCreate,
       company_id: companyId,
+      amount: Number(formCreate.amount),
+      status: formCreate.status,
     });
   };
 
@@ -118,14 +125,13 @@ setFormCreate({
                     <Typography>Amount: €{inv.amount.toFixed(2)}</Typography>
                     <Typography>Issued: {format(new Date(inv.issued_at), 'yyyy-MM-dd')}</Typography>
                     <Chip label={inv.status} color={inv.status === 'Paid' ? 'success' : 'warning'} />
-
                     <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
                       <Button
                         size="small"
                         variant="outlined"
                         onClick={() => {
                           setSelectedInvoiceId(inv.id);
-                          setTabValue(2); // Switch to View tab
+                          setTabValue(2);
                         }}
                       >
                         View
@@ -136,7 +142,7 @@ setFormCreate({
                         color="warning"
                         onClick={() => {
                           setSelectedInvoiceId(inv.id);
-                          setTabValue(3); // Switch to Update tab
+                          setTabValue(3);
                         }}
                       >
                         Update
@@ -161,34 +167,36 @@ setFormCreate({
         <TabPanel value={tabValue} index={1}>
           <Stack spacing={2}>
             {companyQuery.isLoading ? (
-            <Typography>Loading companies...</Typography>
+              <Typography>Loading companies...</Typography>
             ) : (
-            <TextField
+              <TextField
                 select
                 label="Select Company"
                 value={formCreate.company_id}
                 onChange={(e) =>
-                setFormCreate((prev) => ({
+                  setFormCreate((prev) => ({
                     ...prev,
                     company_id: Number(e.target.value),
-                }))
+                  }))
                 }
-            >
+              >
                 {companyQuery.data?.map((company) => (
-                <MenuItem key={company.id} value={company.id}>
+                  <MenuItem key={company.id} value={company.id}>
                     Company #{company.id}
-                </MenuItem>
+                  </MenuItem>
                 ))}
-            </TextField>
+              </TextField>
             )}
-
 
             <TextField
               label="Amount"
               type="number"
               value={formCreate.amount}
               onChange={(e) =>
-                setFormCreate((prev) => ({ ...prev, amount: Number(e.target.value) }))
+                setFormCreate((prev) => ({
+                  ...prev,
+                  amount: e.target.value,
+                }))
               }
             />
 
@@ -265,7 +273,10 @@ setFormCreate({
               type="number"
               value={formUpdate.amount ?? ''}
               onChange={(e) =>
-                setFormUpdate((prev) => ({ ...prev, amount: Number(e.target.value) }))
+                setFormUpdate((prev) => ({
+                  ...prev,
+                  amount: Number(e.target.value),
+                }))
               }
             />
             <TextField
@@ -273,17 +284,16 @@ setFormCreate({
               label="Status"
               value={formUpdate.status ?? ''}
               onChange={(e) =>
-                setFormUpdate((prev) => ({ ...prev, status: e.target.value as InvoiceStatus }))
+                setFormUpdate((prev) => ({
+                  ...prev,
+                  status: e.target.value as InvoiceStatus,
+                }))
               }
             >
               <MenuItem value="Pending">Pending</MenuItem>
               <MenuItem value="Paid">Paid</MenuItem>
             </TextField>
-            <Button
-              variant="contained"
-              onClick={handleUpdateSubmit}
-              disabled={!selectedInvoiceId}
-            >
+            <Button variant="contained" onClick={handleUpdateSubmit} disabled={!selectedInvoiceId}>
               Update Invoice
             </Button>
           </Stack>
