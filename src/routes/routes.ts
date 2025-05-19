@@ -24,6 +24,7 @@ const Reports = lazy(() => import('../pages/reports/Reports'));
 const Settings = lazy(() => import('../pages/settings/Settings'));
 const FileAttachments = lazy(() => import('../pages/file-attachments/FileAttachments'));
 const LeaveRequests = lazy(() => import('../pages/leave-requests/LeaveRequestBase'))
+const Invoices = lazy(() => import('../pages/invoices/InvoiceNav'))
 
 export interface Route {
   path: string;
@@ -168,6 +169,7 @@ export const routes: Routes = {
     protected: true
   },
 
+  // Leave request routes
   leaveRequests:{
     path: '/leave-requests',
     component: LeaveRequests,
