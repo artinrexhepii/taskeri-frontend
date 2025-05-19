@@ -1,12 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { getRoles } from '../../services/role.service';
-import { RoleResponse } from '../../../types/role-permission.types';
+import { Role } from '../../../types/role.types';
 
-export const useRoles = (enabled = true) => {
-  return useQuery<RoleResponse[], Error>({
+/**
+ * Hook to fetch all available roles
+ */
+export const useRoles = () => {
+  return useQuery<Role[], Error>({
     queryKey: ['roles'],
-    queryFn: getRoles,
-    enabled,
+    queryFn: () => getRoles(),
   });
 };
 
