@@ -97,3 +97,165 @@ export default function UserProfiles() {
       });
     }
   }, [userProfileQuery.data, selectedUserId, tabValue]);
+  return (
+    <Stack spacing={3}>
+      <Typography variant="h4">User Profiles</Typography>
+
+      <Card>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={tabValue} onChange={handleTabChange}>
+            <Tab label="Create Profile" />
+            <Tab label="View Profile" />
+            <Tab label="Update Profile" />
+          </Tabs>
+        </Box>
+
+        {/* Tab 0: Create Profile */}
+        <TabPanel value={tabValue} index={0}>
+          <Stack spacing={2}>
+            {usersQuery.isLoading ? (
+              <Typography>Loading users...</Typography>
+            ) : (
+              <TextField
+                select
+                label="Select User (by Email)"
+                value={formCreate.user_id}
+                onChange={(e) =>
+                  setFormCreate((prev) => ({ ...prev, user_id: Number(e.target.value) }))
+                }
+              >
+                {usersQuery.data?.map((user) => (
+                  <MenuItem key={user.id} value={user.id}>
+                    {user.email}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
+
+            <TextField
+              label="Position"
+              value={formCreate.position}
+              onChange={(e) =>
+                setFormCreate((prev) => ({ ...prev, position: e.target.value }))
+              }
+            />
+            <TextField
+              label="Skills"
+              multiline
+              value={formCreate.skills}
+              onChange={(e) =>
+                setFormCreate((prev) => ({ ...prev, skills: e.target.value }))
+              }
+            />
+            <TextField
+              label="Bio"
+              multiline
+              value={formCreate.bio}
+              onChange={(e) => setFormCreate((prev) => ({ ...prev, bio: e.target.value }))}
+            />
+            <TextField
+              label="Profile Picture URL"
+              value={formCreate.profile_pic}
+              onChange={(e) =>
+                setFormCreate((prev) => ({ ...prev, profile_pic: e.target.value }))
+              }
+            />
+
+            <Button variant="contained" onClick={handleCreateSubmit}>
+              Create Profile
+            </Button>
+          </Stack>
+        </TabPanel>
+
+        {/* Tab 1: View Profile */}
+        <TabPanel value={tabValue} index={1}>
+          <Stack spacing={2}>
+            <TextField
+              select
+              label="Select User (by Email)"
+              value={selectedUserId ?? ''}
+              onChange={(e) => setSelectedUserId(Number(e.target.value))}
+            >
+              {usersQuery.data?.map((user) => (
+                <MenuItem key={user.id} value={user.id}>
+                  {user.email}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            {selectedUserId && userProfileQuery.data ? (
+              <Card sx={{ mt: 2, p: 2 }}>
+                <Typography variant="h6">Profile Details</Typography>
+                <Typography><strong>Position:</strong> {userProfileQuery.data.position}</Typography>
+                <Typography><strong>Skills:</strong> {userProfileQuery.data.skills}</Typography>
+                <Typography><strong>Bio:</strong> {userProfileQuery.data.bio}</Typography>
+                <Box sx={{ mt: 1 }}>
+                  <Typography><strong>Profile Picture:</strong></Typography>
+                  <img
+                    src={userProfileQuery.data.profile_pic}
+                    alt="Profile"
+                    style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: 8 }}
+                  />
+                </Box>
+              </Card>
+            ) : (
+              <Typography>Select a user to view their profile.</Typography>
+            )}
+          </Stack>
+        </TabPanel>
+
+        {/* Tab 2: Update Profile */}
+        <TabPanel value={tabValue} index={2}>
+          <TextField
+            select
+            label="Select User to Update (by Email)"
+            value={selectedUserId ?? ''}
+            onChange={(e) => setSelectedUserId(Number(e.target.value))}
+          >
+            {usersQuery.data?.map((user) => (
+              <MenuItem key={user.id} value={user.id}>
+                {user.email}
+              </MenuItem>
+            ))}
+          </TextField>
+
+          <Stack spacing={2} sx={{ mt: 2 }}>
+            <TextField
+              label="Position"
+              value={formUpdate.position}
+              onChange={(e) =>
+                setFormUpdate((prev) => ({ ...prev, position: e.target.value }))
+              }
+            />
+            <TextField
+              label="Skills"
+              multiline
+              value={formUpdate.skills}
+              onChange={(e) => setFormUpdate((prev) => ({ ...prev, skills: e.target.value }))}
+            />
+            <TextField
+              label="Bio"
+              multiline
+              value={formUpdate.bio}
+              onChange={(e) => setFormUpdate((prev) => ({ ...prev, bio: e.target.value }))}
+            />
+            <TextField
+              label="Profile Pic URL"
+              value={formUpdate.profile_pic}
+              onChange={(e) =>
+                setFormUpdate((prev) => ({ ...prev, profile_pic: e.target.value }))
+              }
+            />
+            <Button
+              variant="contained"
+              onClick={handleUpdateSubmit}
+              disabled={!selectedUserId}
+            >
+              Update Profile
+            </Button>
+          </Stack>
+        </TabPanel>
+      </Card>
+    </Stack>
+  );
+}
