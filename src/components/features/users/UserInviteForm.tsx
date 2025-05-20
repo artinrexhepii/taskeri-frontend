@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useAuth } from '../../../context/AuthContext';
-import { useNotification } from '../../../context/NotificationContext';
-import Button from '../../common/Button/Button';
-import Card from '../../common/Card/Card';
-import Input from '../../common/Input/Input';
-import Select from '../../common/Select/Select';
-import { useRoles } from '../../../api/hooks/roles/useRoles';
+import { useCreateUser } from '../../../api/hooks/users/useCreateUser';
 import { useTeams } from '../../../api/hooks/teams/useTeams';
 import { useDepartments } from '../../../api/hooks/departments/useDepartments';
-import { useCreateUser } from '../../../api/hooks/users/useCreateUser';
-import { UserCreate } from '../../../types/user.types';
+import { useRoleContext } from '../../../context/RoleContext';
+import { useNotification } from '../../../context/NotificationContext';
+import Input from '../../common/Input/Input';
+import Select from '../../common/Select/Select';
+import Button from '../../common/Button/Button';
+import Card from '../../common/Card/Card';
 
 interface UserInviteFormData {
   email: string;
@@ -30,9 +28,8 @@ interface UserInviteFormProps {
 
 const UserInviteForm: React.FC<UserInviteFormProps> = ({ tenantId, onSuccess }) => {
   const { showNotification } = useNotification();
-  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const { data: roles, isLoading: rolesLoading } = useRoles();
+  const { roles } = useRoleContext();
   const { data: teams, isLoading: teamsLoading } = useTeams();
   const { data: departments, isLoading: departmentsLoading } = useDepartments();
   const createUserMutation = useCreateUser();
@@ -190,7 +187,7 @@ const UserInviteForm: React.FC<UserInviteFormProps> = ({ tenantId, onSuccess }) 
             }
           })}
           error={errors.role?.message}
-          disabled={rolesLoading}
+          disabled={false}
         >
           <option value="">Select a role</option>
           {roles?.map(role => (

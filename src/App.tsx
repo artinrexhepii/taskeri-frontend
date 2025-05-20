@@ -3,10 +3,12 @@ import { BrowserRouter } from 'react-router-dom';
 import './App.css';
 import Router from './routes';
 import { AuthProvider } from './context/AuthContext';
+import { RoleProvider } from './context/RoleContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import theme from './theme';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -15,20 +17,26 @@ const LoadingFallback = () => (
   </div>
 );
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AuthProvider>
-        <NotificationProvider>
-          <BrowserRouter>
-            <Suspense fallback={<LoadingFallback />}>
-              <Router />
-            </Suspense>
-          </BrowserRouter>
-        </NotificationProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AuthProvider>
+          <NotificationProvider>
+            <RoleProvider>
+              <BrowserRouter>
+                <Suspense fallback={<LoadingFallback />}>
+                  <Router />
+                </Suspense>
+              </BrowserRouter>
+            </RoleProvider>
+          </NotificationProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 

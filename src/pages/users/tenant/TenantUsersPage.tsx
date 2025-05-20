@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState} from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useTenantUsers } from '../../../api/hooks/tenants/useTenantUsers';
 import { useDeleteUser } from '../../../api/hooks/users/useDeleteUser';
@@ -25,13 +25,7 @@ import {
   ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
 import { formatDate } from '../../../utils/formatters';
-import { Role } from '../../../types/role.types';
-
-const getRoleName = (roleId?: number, roles?: Role[]): string => {
-  if (!roleId || !roles || roles.length === 0) return 'No role assigned';
-  const role = roles.find(role => role.id === roleId);
-  return role ? role.name : 'No role assigned';
-};
+import { useRoleContext } from '../../../context/RoleContext';
 
 const getDepartmentName = (departmentId?: number, departments?: any[]): string => {
   if (!departmentId || !departments || departments.length === 0) return 'No department';
@@ -67,6 +61,7 @@ const TenantUsersPage: React.FC = () => {
   const { data: departments } = useDepartments();
   const { data: teams } = useTeams();
   const deleteUserMutation = useDeleteUser();
+  const { getRoleName } = useRoleContext();
 
   // Filter users based on search query and filters
   const filteredUsers = tenantUsers?.items.filter(user => {
@@ -310,7 +305,7 @@ const TenantUsersPage: React.FC = () => {
                   <div className="mb-4">
                     <p className="text-xs text-gray-900 uppercase tracking-wider mb-1">Role</p>
                     <p className="text-sm font-medium text-gray-800">
-                      {getRoleName(tenantUser.role_id, roles)}
+                      {getRoleName(tenantUser.role_id)}
                     </p>
                   </div>
 

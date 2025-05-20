@@ -4,7 +4,7 @@ import { useUpdateTenantUser } from '../../../api/hooks/tenants/useUpdateTenantU
 import { useAssignRoleToUser } from '../../../api/hooks/user-roles/useAssignRoleToUser';
 import { useTeams } from '../../../api/hooks/teams/useTeams';
 import { useDepartments } from '../../../api/hooks/departments/useDepartments';
-import { useRoles } from '../../../api/hooks/roles/useRoles';
+import { useRoleContext } from '../../../context/RoleContext';
 import { TenantUser } from '../../../types/tenant.types';
 import { UserUpdate } from '../../../types/user.types';
 import { useNotification } from '../../../context/NotificationContext';
@@ -26,13 +26,14 @@ interface FormData extends UserUpdate {
   role_id: string;
 }
 
-const EditUserForm: React.FC<EditUserFormProps> = ({ user, tenantId, onClose, onSuccess }) => {
+export const EditUserForm: React.FC<EditUserFormProps> = ({ user, tenantId, onClose, onSuccess }) => {
   const { showNotification } = useNotification();
   const updateUserMutation = useUpdateTenantUser();
   const assignRoleMutation = useAssignRoleToUser();
   const { data: teams } = useTeams();
   const { data: departments } = useDepartments();
-  const { data: roles } = useRoles();
+  const { roles } = useRoleContext();
+
   const [selectedRole, setSelectedRole] = useState<string>(user.role_id?.toString() || '');
   const [selectedTeam, setSelectedTeam] = useState<string>(user.team_id?.toString() || '');
   const [selectedDepartment, setSelectedDepartment] = useState<string>(user.department_id?.toString() || '');

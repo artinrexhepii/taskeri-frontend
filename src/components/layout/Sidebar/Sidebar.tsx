@@ -13,7 +13,7 @@ import {
 import { BanknotesIcon } from '@heroicons/react/24/outline';
 import { getPath } from '../../../routes/routes';
 import { useAuth } from '../../../context/AuthContext';
-import { useRoles } from '../../../api/hooks/roles/useRoles';
+import { useRoleContext } from '../../../context/RoleContext';
 
 interface NavItem {
   name: string;
@@ -44,7 +44,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
   const { user } = useAuth();
-  const { data: roles } = useRoles();
+  const { getRoleName } = useRoleContext();
 
   // Debug log to show user roles when component mounts
   useEffect(() => {
@@ -53,12 +53,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       console.log('User role_id:', user?.role_id);
     }
   }, [user]);
-
-  const getRoleName = (roleId: number | undefined) => {
-    if (!roleId || !roles) return 'No role assigned';
-    const role = roles.find(r => r.id === roleId);
-    return role ? role.name : 'Unknown Role';
-  };
 
   const isActive = (path: string) => {
     return location.pathname === path ||
