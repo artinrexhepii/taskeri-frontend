@@ -1,4 +1,5 @@
 import { lazy } from 'react';
+import LeaveRequestForm from '../pages/leave-requests/LeaveRequestForm';
 
 // Lazy load page components
 const Login = lazy(() => import('../pages/auth/Login'));
@@ -26,6 +27,8 @@ const RegisterCompanyPage = lazy(() => import('../pages/company/RegisterCompanyP
 const RegisterDepartmentPage = lazy(() => import('../pages/department/RegisterDepartmentPage'));
 const RegisterTeamPage = lazy(() => import('../pages/team/RegisterTeamPage'));
 const RegisterUserPage = lazy(() => import('../pages/users/RegisterUserPage'));
+const LeaveRequests = lazy(() => import('../pages/leave-requests/LeaveRequestBase'))
+const Invoices = lazy(() => import('../pages/invoices/InvoiceNav'))
 
 export interface Route {
   path: string;
@@ -186,6 +189,18 @@ export const routes: Routes = {
   registerUser: {
     path: '/register-user',
     component: RegisterUserPage
+  },
+  // Leave request routes
+  leaveRequests:{
+    path: '/leave-requests',
+    component: LeaveRequests,
+    protected: true
+  },
+
+  invoices:{
+    path: '/invoices',
+    component: Invoices,
+    protected: true
   }
 };
 

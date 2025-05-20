@@ -1,4 +1,4 @@
-export type LeaveType = "Vacation" | "Sick" | "Personal" | "Other";
+export type LeaveType = "Vacation" | "Sick Leave" | "Personal" | "Other";
 export type LeaveStatus = "Pending" | "Approved" | "Rejected";
 
 export interface LeaveRequestCreate {
@@ -25,4 +25,11 @@ export interface LeaveRequestResponse {
   reason?: string;
   status: LeaveStatus;
   created_at: string;
+}
+
+export interface LeaveRequestListResponse {
+  items: LeaveRequestResponse[];
+  total: number;
+  page: number;
+  pagesize: number;
 }
