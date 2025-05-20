@@ -1,20 +1,20 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import {
   Box,
+  Button,
   Card,
-  Grid,
   Stack,
   Tab,
   Tabs,
+  TextField,
   Typography,
+  MenuItem,
 } from '@mui/material';
-import { useUser } from '../../api/hooks/users/useUser';
 import { useUserProfile } from '../../api/hooks/user-profiles/useUserProfile';
-import { useUserProjects } from '../../api/hooks/user-projects/useUserProjects';
-import { useTasksByUser } from '../../api/hooks/tasks/useTasksByUser';
-import { useUserActivityLogs } from '../../api/hooks/activity-logs/useUserActivityLogs';
-import { format } from 'date-fns';
+import { useCreateUserProfile } from '../../api/hooks/user-profiles/useCreateUserProfile';
+import { useUpdateUserProfile } from '../../api/hooks/user-profiles/useUpdateUserProfile';
+import { useUsers } from '../../api/hooks/users/useUsers';
+import { UserProfileCreate, UserProfileUpdate } from '../../types/user-profile.types';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -22,15 +22,13 @@ interface TabPanelProps {
   value: number;
 }
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
+function TabPanel({ children, value, index, ...other }: TabPanelProps) {
   return (
     <div
       role="tabpanel"
       hidden={value !== index}
-      id={`user-tabpanel-${index}`}
-      aria-labelledby={`user-tab-${index}`}
+      id={`user-profile-tabpanel-${index}`}
+      aria-labelledby={`user-profile-tab-${index}`}
       {...other}
     >
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
@@ -38,112 +36,64 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-export default function UserProfile() {
-  const { id } = useParams<{ id: string }>();
-  const userId = parseInt(id || '0', 10);
+export default function UserProfiles() {
   const [tabValue, setTabValue] = useState(0);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [formCreate, setFormCreate] = useState<UserProfileCreate>({
+    user_id: 0,
+    position: '',
+    skills: '',
+    bio: '',
+    profile_pic: '',
+  });
 
-  const { data: user, isLoading: isLoadingUser } = useUser(userId);
-  const { data: profile, isLoading: isLoadingProfile } = useUserProfile(userId);
-  const { data: projects, isLoading: isLoadingProjects } = useUserProjects(userId);
-  const { data: tasks, isLoading: isLoadingTasks } = useTasksByUser(userId);
-  const { data: activityLogs, isLoading: isLoadingActivity } = useUserActivityLogs(userId);
+  const [formUpdate, setFormUpdate] = useState<UserProfileUpdate>({
+    position: '',
+    skills: '',
+    bio: '',
+    profile_pic: '',
+  });
+
+  const userProfileQuery = useUserProfile(selectedUserId ?? 0);
+  const createProfile = useCreateUserProfile();
+  const updateProfile = useUpdateUserProfile();
+  const usersQuery = useUsers();
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
+    if (newValue === 0) {
+      setFormCreate({
+        user_id: 0,
+        position: '',
+        skills: '',
+        bio: '',
+        profile_pic: '',
+      });
+    }
   };
 
-  if (isLoadingUser || isLoadingProfile) {
-    return <Typography>Loading...</Typography>;
-  }
+  const handleCreateSubmit = () => {
+    if (!formCreate.user_id) return;
+    createProfile.mutate(formCreate);
+  };
 
-  if (!user) {
-    return <Typography>User not found</Typography>;
-  }
+  const handleUpdateSubmit = () => {
+    if (selectedUserId) {
+      updateProfile.mutate({
+        userId: selectedUserId,
+        profileData: formUpdate,
+      });
+    }
+  };
 
-  return (
-    <Stack spacing={3}>
-      <Card sx={{ p: 3 }}>
-        <Grid container spacing={3}>
-        <Grid sx={{ width: { xs: '100%', md: '66.66%' } }}>
-            <Typography variant="h4">
-              {user.first_name} {user.last_name}
-            </Typography>
-            <Typography color="text.secondary">{user.email}</Typography>
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              Role: {user.email}
-            </Typography>
-            <Typography variant="body2">
-              Member since: {format(new Date(user.created_at), 'MMM dd, yyyy')}
-            </Typography>
-          </Grid>
-          
-        </Grid>
-      </Card>
-
-      <Card>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={tabValue} onChange={handleTabChange}>
-            <Tab label="Projects" />
-            <Tab label="Tasks" />
-            <Tab label="Activity" />
-          </Tabs>
-        </Box>
-
-        <TabPanel value={tabValue} index={0}>
-          {isLoadingProjects ? (
-            <Typography>Loading projects...</Typography>
-          ) : (
-            <Stack spacing={2}>
-              {projects?.map((project) => (
-                <Card key={project.id} sx={{ p: 2 }}>
-                  <Typography variant="subtitle1">{project.name}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {project.name}
-                  </Typography>
-                </Card>
-              ))}
-            </Stack>
-          )}
-        </TabPanel>
-
-        <TabPanel value={tabValue} index={1}>
-          {isLoadingTasks ? (
-            <Typography>Loading tasks...</Typography>
-          ) : (
-            <Stack spacing={2}>
-              {tasks?.map((task) => (
-                <Card key={task.id} sx={{ p: 2 }}>
-                  <Typography variant="subtitle1">{task.name}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {task.description}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Status: {task.status}
-                  </Typography>
-                </Card>
-              ))}
-            </Stack>
-          )}
-        </TabPanel>
-
-        <TabPanel value={tabValue} index={2}>
-          {isLoadingActivity ? (
-            <Typography>Loading activity...</Typography>
-          ) : (
-            <Stack spacing={2}>
-              {activityLogs?.items.map((log) => (
-                <Card key={log.id} sx={{ p: 2 }}>
-                  <Typography variant="body2">{log.details}</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {format(new Date(log.created_at), 'MMM dd, yyyy HH:mm')}
-                  </Typography>
-                </Card>
-              ))}
-            </Stack>
-          )}
-        </TabPanel>
-      </Card>
-    </Stack>
-  );
-} 
+  // Load profile data into update form when a user is selected and profile data is fetched
+  useEffect(() => {
+    if (userProfileQuery.data && tabValue === 2) {
+      setFormUpdate({
+        position: userProfileQuery.data.position || '',
+        skills: userProfileQuery.data.skills || '',
+        bio: userProfileQuery.data.bio || '',
+        profile_pic: userProfileQuery.data.profile_pic || '',
+      });
+    }
+  }, [userProfileQuery.data, selectedUserId, tabValue]);
