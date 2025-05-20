@@ -18,7 +18,7 @@ const RegisterDepartmentPage: React.FC = () => {
   const { showNotification } = useNotification();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const { register, handleSubmit, formState: { errors } } = useForm<DepartmentFormData>();
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<DepartmentFormData>();
   const createDepartmentMutation = useCreateDepartment();
   const { data: companies, isLoading: companiesLoading } = useCompany();
 
@@ -60,6 +60,10 @@ const RegisterDepartmentPage: React.FC = () => {
               })}
               error={errors.companyId?.message}
               disabled={companiesLoading}
+              onChange={(e) => {
+                // Update the value in react-hook-form
+                setValue('companyId', e.target.value, { shouldValidate: true });
+              }}
             >
               <option value="">Select a company</option>
               {companies?.map((company) => (

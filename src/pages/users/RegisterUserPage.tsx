@@ -8,6 +8,7 @@ import Input from '../../components/common/Input/Input';
 import { useTeams } from '../../api/hooks/teams/useTeams';
 import { useDepartments } from '../../api/hooks/departments/useDepartments';
 import Select from '../../components/common/Select/Select';
+import { useNavigate } from 'react-router-dom';
 
 interface UserFormData {
   first_name: string;
@@ -21,10 +22,11 @@ interface UserFormData {
 const RegisterUserPage: React.FC = () => {
   const { showNotification } = useNotification();
   const [isLoading, setIsLoading] = useState(false);
-  const { register, handleSubmit, formState: { errors } } = useForm<UserFormData>();
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<UserFormData>();
   const createUserMutation = useCreateUser();
   const { data: teams, isLoading: teamsLoading } = useTeams();
   const { data: departments, isLoading: departmentsLoading } = useDepartments();
+  const navigate = useNavigate();
 
   const onSubmit = async (data: UserFormData) => {
     try {
@@ -40,6 +42,7 @@ const RegisterUserPage: React.FC = () => {
       };
       await createUserMutation.mutateAsync(userCreateData);
       showNotification('success', 'User Registered', 'The user has been successfully registered.');
+      navigate('/'); // Navigate to the home page
     } catch (error) {
       showNotification('error', 'Registration Failed', 'An error occurred while registering the user.');
     } finally {
@@ -81,6 +84,10 @@ const RegisterUserPage: React.FC = () => {
               {...register('teamId', { required: 'Team is required' })}
               error={errors.teamId?.message}
               disabled={teamsLoading}
+              onChange={(e) => {
+                // Update the value in react-hook-form
+                setValue('teamId', e.target.value, { shouldValidate: true });
+              }}
             >
               <option value="">Select a team</option>
               {teams?.map((team) => (
@@ -94,6 +101,10 @@ const RegisterUserPage: React.FC = () => {
               {...register('department_id', { required: 'Department is required' })}
               error={errors.department_id?.message}
               disabled={departmentsLoading}
+              onChange={(e) => {
+                // Update the value in react-hook-form
+                setValue('department_id', e.target.value, { shouldValidate: true });
+              }}
             >
               <option value="">Select a department</option>
               {departments?.map((department) => (

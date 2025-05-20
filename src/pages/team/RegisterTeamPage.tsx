@@ -18,7 +18,7 @@ const RegisterTeamPage: React.FC = () => {
   const { showNotification } = useNotification();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const { register, handleSubmit, formState: { errors } } = useForm<TeamFormData>();
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm<TeamFormData>();
   const createTeamMutation = useCreateTeam();
   const { data: departments, isLoading: departmentsLoading } = useDepartments();
 
@@ -57,6 +57,10 @@ const RegisterTeamPage: React.FC = () => {
               {...register('departmentId', { required: 'Department is required' })}
               error={errors.departmentId?.message}
               disabled={departmentsLoading}
+              onChange={(e) => {
+                // Update the value in react-hook-form
+                setValue('departmentId', e.target.value, { shouldValidate: true });
+              }}
             >
               <option value="">Select a department</option>
               {departments?.map((department) => (
