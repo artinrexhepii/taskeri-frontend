@@ -29,6 +29,8 @@ const RegisterTeamPage = lazy(() => import('../pages/team/RegisterTeamPage'));
 const RegisterUserPage = lazy(() => import('../pages/users/RegisterUserPage'));
 const LeaveRequests = lazy(() => import('../pages/leave-requests/LeaveRequestBase'))
 const Invoices = lazy(() => import('../pages/invoices/InvoiceNav'))
+const Companies = lazy(() => import('../pages/company/CompanyList'))
+const CompanyDepartmentsPage = lazy(() => import('../pages/company/CompanyDepartments'));
 
 export interface Route {
   path: string;
@@ -201,7 +203,20 @@ export const routes: Routes = {
     path: '/invoices',
     component: Invoices,
     protected: true
-  }
+  },
+
+  companies:{
+    path: '/companies',
+    component: Companies,
+    protected: true
+  },
+
+  companyDepartments: {
+  path: '/companies/:companyId/departments',
+  component: CompanyDepartmentsPage,
+  protected: true
+}
+
 };
 
 export const getRoute = (key: keyof Routes): Route => routes[key];
