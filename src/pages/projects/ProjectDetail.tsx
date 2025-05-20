@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
 import {
   Autocomplete,
   Box,
@@ -24,9 +25,8 @@ import { useProjects } from '../../api/hooks/projects/useProjects';
 import { useDeleteProject } from '../../api/hooks/projects/useDeleteProject';
 import { useTasks } from '../../api/hooks/tasks/useTasks';
 import TaskList from '../tasks/TaskList';
-
+import { useUsers } from '../../api/hooks/users/useUsers';
 import { useProjectUsers } from '../../api/hooks/user-projects/useProjectUsers';
-import { useTenantUsers } from '../../api/hooks/tenants/useTenantUsers';
 import { useAssignUserToProject } from '../../api/hooks/user-projects/useAssignUserToProject';
 import { useRemoveUserFromProject } from '../../api/hooks/user-projects/useRemoveUserFromProject';
 import { ProjectStatus } from '../../types/project.types';
@@ -57,13 +57,13 @@ export default function ProjectDetail() {
   const navigate = useNavigate();
   const projectId = Number(id); 
   const { user } = useAuth();
-  const tenantId = user?.tenant_id || 1;
+  const { showNotification } = useNotification();
 
   const { data: projectData, refetch: getProject } = useProjects();
   const { mutate: deleteProject } = useDeleteProject();
   const { data: tasksData, refetch: getTasksByProject } = useTasks();
-  const { data: tenantUserResponse } = useTenantUsers(tenantId);
-  const users = tenantUserResponse?.items ?? [];  const { data: projectUsers = [] } = useProjectUsers(projectId);
+  const { data: users = [] } = useUsers();
+  const { data: projectUsers = [] } = useProjectUsers(projectId);
   const { mutate: assignUser } = useAssignUserToProject();
   const { mutate: removeUser } = useRemoveUserFromProject();
 
@@ -91,16 +91,45 @@ export default function ProjectDetail() {
     }
   };
 
-  const handleAssignUser = () => {
-    if (selectedUser) {
-      assignUser({ projectId, userId: selectedUser.id });
+  const handleAssignUser = async () => {
+    if (!selectedUser) return;
+    
+    try {
+      await assignUser({ projectId, userId: selectedUser.id });
+      showNotification(
+        'success',
+        'User assigned',
+        `${selectedUser.first_name} ${selectedUser.last_name} has been assigned to the project`
+      );
       setSelectedUser(null);
+    } catch (error) {
+      showNotification(
+        'error',
+        'Assignment failed',
+        error instanceof Error ? error.message : 'Failed to assign user to project'
+      );
     }
   };
 
-  const handleRemoveUser = (userId: number) => {
-    if (window.confirm('Remove this user from the project?')) {
-      removeUser({ projectId, userId });
+  const handleRemoveUser = async (userId: number) => {
+    const userToRemove = users.find(u => u.id === userId);
+    if (!userToRemove) return;
+
+    if (window.confirm(`Remove ${userToRemove.first_name} ${userToRemove.last_name} from the project?`)) {
+      try {
+        await removeUser({ projectId, userId });
+        showNotification(
+          'success',
+          'User removed',
+          `${userToRemove.first_name} ${userToRemove.last_name} has been removed from the project`
+        );
+      } catch (error) {
+        showNotification(
+          'error',
+          'Removal failed',
+          error instanceof Error ? error.message : 'Failed to remove user from project'
+        );
+      }
     }
   };
 

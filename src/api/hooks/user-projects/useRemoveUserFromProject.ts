@@ -5,7 +5,7 @@ export const useRemoveUserFromProject = () => {
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, { projectId: number; userId: number }>({
-    mutationFn: ({ projectId, userId }) => removeUserFromProject(projectId, userId),
+    mutationFn: ({ userId, projectId }) => removeUserFromProject(userId, projectId),
     onSuccess: (_, variables) => {
       // Invalidate project users query
       queryClient.invalidateQueries({ 

@@ -16,11 +16,9 @@ export const getMyProjects = async (): Promise<ProjectResponse[]> => {
 };
 
 export const assignUserToProject = async (userId: number, projectId: number): Promise<void> => {
-  await apiClient.post(API_ENDPOINTS.USER_PROJECTS.BASE, { user_id: userId, project_id: projectId });
+  await apiClient.post(`${API_ENDPOINTS.USER_PROJECTS.BASE}?user_id=${userId}&project_id=${projectId}`);
 };
 
 export const removeUserFromProject = async (userId: number, projectId: number): Promise<void> => {
-  await apiClient.delete(API_ENDPOINTS.USER_PROJECTS.BASE, { 
-    data: { user_id: userId, project_id: projectId } 
-  });
+  await apiClient.delete(`${API_ENDPOINTS.USER_PROJECTS.BASE}?user_id=${userId}&project_id=${projectId}`);
 };
