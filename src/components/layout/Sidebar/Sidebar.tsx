@@ -31,7 +31,8 @@ const navItems: NavItem[] = [
   { name: 'Company Users', path: '/company/users', icon: BuildingOfficeIcon },
   { name: 'Settings', path: getPath('settings'), icon: CogIcon },
   { name: 'Leave Requests', path: getPath('leaveRequests'), icon: HomeIcon },
-  { name: 'Invoices', path: getPath('invoices'), icon: BanknotesIcon }
+  { name: 'Invoices', path: getPath('invoices'), icon: BanknotesIcon },
+  { name: 'Company', path: getPath('companies'), icon: BuildingOfficeIcon}
 ];
 
 interface SidebarProps {
