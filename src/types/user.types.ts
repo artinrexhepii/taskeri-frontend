@@ -34,6 +34,7 @@ export interface UserDetails {
   last_name: string;
   department_id: number | null;
   team_id: number | null;
+  role_id: number;
   tenant_schema?: string;
   tenant_id?: number;
   roles?: RoleResponse[];
@@ -49,8 +50,6 @@ export interface TenantUserCreate {
   password: string;
   tenant_schema: string;
 }
-
- 
 
 export interface TenantUserResponse {
   id: number;

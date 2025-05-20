@@ -13,6 +13,7 @@ import {
 import { BanknotesIcon } from '@heroicons/react/24/outline';
 import { getPath } from '../../../routes/routes';
 import { useAuth } from '../../../context/AuthContext';
+import { useRoles } from '../../../api/hooks/roles/useRoles';
 
 interface NavItem {
   name: string;
@@ -43,25 +44,21 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
   const { user } = useAuth();
+  const { data: roles } = useRoles();
 
   // Debug log to show user roles when component mounts
   useEffect(() => {
     if (user) {
       console.log('Current user:', user);
-      console.log('User roles:', user?.roles);
-      
-      if (user?.roles && user.roles.length > 0) {
-        console.log('User has the following roles:');
-        user.roles.forEach((role, index) => {
-          console.log(`Role ${index + 1}: ${role.name} (ID: ${role.id})`);
-        });
-      } else {
-        console.log('User has no roles assigned');
-      }
-      
-      console.log('User permissions:', user?.permissions);
+      console.log('User role_id:', user?.role_id);
     }
   }, [user]);
+
+  const getRoleName = (roleId: number | undefined) => {
+    if (!roleId || !roles) return 'No role assigned';
+    const role = roles.find(r => r.id === roleId);
+    return role ? role.name : 'Unknown Role';
+  };
 
   const isActive = (path: string) => {
     return location.pathname === path ||
@@ -117,18 +114,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
         {/* User section with role information */}
         <div className="absolute bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-          {/* Role information - for debugging */}
+          {/* Role information */}
           <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900">
-            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Current Role(s)</h4>
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Current Role</h4>
             <div className="mt-1 max-h-24 overflow-y-auto">
-              {user?.roles && user.roles.length > 0 ? (
-                user.roles.map(role => (
-                  <div key={role.id} className="text-xs py-1 px-2 my-1 bg-primary/10 text-primary rounded">
-                    {role.name}
-                  </div>
-                ))
+              {user?.role_id ? (
+                <div className="text-xs py-1 px-2 my-1 bg-primary/10 text-primary rounded">
+                  {getRoleName(user.role_id)}
+                </div>
               ) : (
-                <span className="text-xs text-gray-500">No roles assigned</span>
+                <span className="text-xs text-gray-500">No role assigned</span>
               )}
             </div>
           </div>
