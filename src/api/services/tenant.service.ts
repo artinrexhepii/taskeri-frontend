@@ -30,6 +30,7 @@ export const getTenantUsers = async (
       user_id: user.id,
       tenant_id: tenantId,
       is_active: true,
+      role_id: user.role_id, 
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       user: {
