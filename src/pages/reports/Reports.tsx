@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import { useProjectStatistics } from '../../api/hooks/projects/useProjectStatistics';
 import { useTeamStatistics } from '../../api/hooks/teams/useTeamStatistics';
-import { useActivityLogs } from '../../api/hooks/activity-logs/useActivityLogs';
+
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -38,13 +38,13 @@ export default function Reports() {
   const [tabValue, setTabValue] = useState(0);
   const { data: projectStats, isLoading: isLoadingProjectStats } = useProjectStatistics();
   const { data: teamStats, isLoading: isLoadingTeamStats } = useTeamStatistics();
-  const { data: activityLogs, isLoading: isLoadingActivity } = useActivityLogs();
+
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
-  if (isLoadingProjectStats || isLoadingTeamStats || isLoadingActivity) {
+  if (isLoadingProjectStats || isLoadingTeamStats) {
     return <Typography>Loading...</Typography>;
   }
 
@@ -57,7 +57,7 @@ export default function Reports() {
           <Tabs value={tabValue} onChange={handleTabChange}>
             <Tab label="Project Statistics" />
             <Tab label="Team Statistics" />
-            <Tab label="Activity Logs" />
+            
           </Tabs>
         </Box>
 
@@ -113,18 +113,7 @@ export default function Reports() {
           </Grid>
         </TabPanel>
 
-        <TabPanel value={tabValue} index={2}>
-          <Stack spacing={2}>
-            {activityLogs?.items.map((log) => (
-              <Card key={log.id} sx={{ p: 2 }}>
-                <Typography variant="body2">{log.details}</Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {new Date(log.created_at).toLocaleString()}
-                </Typography>
-              </Card>
-            ))}
-          </Stack>
-        </TabPanel>
+       
       </Card>
     </Stack>
   );

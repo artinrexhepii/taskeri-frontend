@@ -2,23 +2,18 @@ import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTasks } from '../../api/hooks/tasks/useTasks';
 import { useProjects } from '../../api/hooks/projects/useProjects';
-import { useActivityLogs } from '../../api/hooks/activity-logs/useActivityLogs';
 import Card from '../../components/common/Card/Card';
 import { ChartBarIcon, ClockIcon, CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 import { TaskBase, TaskStatus } from '../../types/task.types';
-import { ProjectBasicInfo } from '../../types/project.types';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const { data: tasksData } = useTasks();
   const { data: projectsData } = useProjects();
-  const { data: activityLogsData } = useActivityLogs(1, 5);
 
   // Safely access the tasks and projects data
   const tasks = tasksData?.items || [];
- 
-  const activityLogs = activityLogsData?.items || [];
 
   // Calculate task statistics
   const taskStats = {
@@ -103,81 +98,51 @@ const Dashboard: React.FC = () => {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Tasks */}
-        <div className="lg:col-span-2">
-          <Card>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium text-text-primary">Recent Tasks</h2>
-              <Link 
-                to="/tasks" 
-                className="text-sm text-primary hover:text-primary/80"
-              >
-                View all
-              </Link>
-            </div>
-            <div className="space-y-4">
-              {tasks.slice(0, 5).map(task => (
-                <Link key={task.id} to={`/tasks/${task.id}`} className="block">
-                  <div className="flex items-center justify-between p-4 hover:bg-background-main rounded-lg transition-colors">
-                    <div className="flex items-center space-x-3">
-                      <div className={`h-2 w-2 rounded-full ${
-                        task.status === TaskStatus.DONE ? 'bg-secondary' :
-                        task.status === TaskStatus.IN_PROGRESS ? 'bg-warning' :
-                        task.status === TaskStatus.TODO ? 'bg-primary' : 'bg-danger'
-                      }`}></div>
-                      <div>
-                        <h3 className="text-sm font-medium text-text-primary">{task.name}</h3>
-                        <p className="text-xs text-text-secondary">
-                          
-                          Due {task.due_date ? formatDate(task.due_date) : 'No due date'}
-                        </p>
-                      </div>
-                    </div>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      task.status === TaskStatus.DONE ? 'bg-secondary/10 text-secondary' :
-                      task.status === TaskStatus.IN_PROGRESS ? 'bg-warning/10 text-warning' :
-                      task.status === TaskStatus.TODO ? 'bg-primary/10 text-primary' : 'bg-danger/10 text-danger'
-                    }`}>
-                      {task.status}
-                    </span>
+      {/* Recent Tasks */}
+      <Card>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-medium text-text-primary">Recent Tasks</h2>
+          <Link 
+            to="/tasks" 
+            className="text-sm text-primary hover:text-primary/80"
+          >
+            View all
+          </Link>
+        </div>
+        <div className="space-y-4">
+          {tasks.slice(0, 5).map(task => (
+            <Link key={task.id} to={`/tasks/${task.id}`} className="block">
+              <div className="flex items-center justify-between p-4 hover:bg-background-main rounded-lg transition-colors">
+                <div className="flex items-center space-x-3">
+                  <div className={`h-2 w-2 rounded-full ${
+                    task.status === TaskStatus.DONE ? 'bg-secondary' :
+                    task.status === TaskStatus.IN_PROGRESS ? 'bg-warning' :
+                    task.status === TaskStatus.TODO ? 'bg-primary' : 'bg-danger'
+                  }`}></div>
+                  <div>
+                    <h3 className="text-sm font-medium text-text-primary">{task.name}</h3>
+                    <p className="text-xs text-text-secondary">
+                      Due {task.due_date ? formatDate(task.due_date) : 'No due date'}
+                    </p>
                   </div>
-                </Link>
-              ))}
-              {tasks.length === 0 && (
-                <div className="text-center py-8 text-text-secondary">
-                  No tasks found. Create a new task to get started.
                 </div>
-              )}
+                <span className={`text-xs px-2 py-1 rounded-full ${
+                  task.status === TaskStatus.DONE ? 'bg-secondary/10 text-secondary' :
+                  task.status === TaskStatus.IN_PROGRESS ? 'bg-warning/10 text-warning' :
+                  task.status === TaskStatus.TODO ? 'bg-primary/10 text-primary' : 'bg-danger/10 text-danger'
+                }`}>
+                  {task.status}
+                </span>
+              </div>
+            </Link>
+          ))}
+          {tasks.length === 0 && (
+            <div className="text-center py-8 text-text-secondary">
+              No tasks found. Create a new task to get started.
             </div>
-          </Card>
+          )}
         </div>
-
-        {/* Activity Log */}
-        <div>
-          <Card>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium text-text-primary">Recent Activity</h2>
-            </div>
-            <div className="space-y-4">
-              {activityLogs.map(log => (
-                <div key={log.id} className="relative pl-6 pb-4 border-l border-border">
-                  <div className="absolute top-0 left-0 h-3 w-3 -ml-1.5 rounded-full bg-primary"></div>
-                  <p className="text-sm text-text-primary">{log.action}</p>
-                  <p className="text-xs text-text-secondary">
-                    By {log.user?.first_name} • {formatDate(log.created_at)}
-                  </p>
-                </div>
-              ))}
-              {activityLogs.length === 0 && (
-                <div className="text-center py-8 text-text-secondary">
-                  No recent activity found.
-                </div>
-              )}
-            </div>
-          </Card>
-        </div>
-      </div>
+      </Card>
     </div>
   );
 };
