@@ -36,7 +36,6 @@ export interface UserDetails {
   team_id: number | null;
   tenant_schema?: string;
   tenant_id?: number;
-  is_active?: boolean;
   roles?: RoleResponse[];
   permissions?: string[];
   created_at?: string;
@@ -51,6 +50,8 @@ export interface TenantUserCreate {
   tenant_schema: string;
 }
 
+ 
+
 export interface TenantUserResponse {
   id: number;
   email: string;
@@ -64,3 +65,4 @@ export interface UserBasicInfo {
   last_name: string;
   email: string;
 }
+

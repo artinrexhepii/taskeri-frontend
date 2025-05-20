@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../../context/AuthContext';
 import { useNotification } from '../../../context/NotificationContext';
@@ -7,16 +7,20 @@ import Card from '../../common/Card/Card';
 import Input from '../../common/Input/Input';
 import Select from '../../common/Select/Select';
 import { useRoles } from '../../../api/hooks/roles/useRoles';
-import { useAddUserToTenant } from '../../../api/hooks/tenants/useAddUserToTenant';
-import { TenantUserCreate } from '../../../types/tenant.types';
+import { useTeams } from '../../../api/hooks/teams/useTeams';
+import { useDepartments } from '../../../api/hooks/departments/useDepartments';
+import { useCreateUser } from '../../../api/hooks/users/useCreateUser';
+import { UserCreate } from '../../../types/user.types';
 
 interface UserInviteFormData {
   email: string;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   password: string;
   confirmPassword: string;
-  roleId: string;
+  role: string;
+  teamId: string;
+  department_id: string;
 }
 
 interface UserInviteFormProps {
@@ -29,38 +33,55 @@ const UserInviteForm: React.FC<UserInviteFormProps> = ({ tenantId, onSuccess }) 
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const { data: roles, isLoading: rolesLoading } = useRoles();
-  const addUserMutation = useAddUserToTenant(tenantId);
+  const { data: teams, isLoading: teamsLoading } = useTeams();
+  const { data: departments, isLoading: departmentsLoading } = useDepartments();
+  const createUserMutation = useCreateUser();
+  const [selectedRoleId, setSelectedRoleId] = useState<string>('');
   
-  const { register, handleSubmit, watch, reset, formState: { errors, isSubmitting } } = useForm<UserInviteFormData>({
+  const { register, handleSubmit, watch, reset, setValue, formState: { errors, isSubmitting } } = useForm<UserInviteFormData>({
     defaultValues: {
       email: '',
-      firstName: '',
-      lastName: '',
+      first_name: '',
+      last_name: '',
       password: '',
       confirmPassword: '',
-      roleId: ''
+      role: '',
+      teamId: '',
+      department_id: ''
     }
   });
   const password = watch('password');
+  
+  
+  useEffect(() => {
+    if (selectedRoleId) {
+      setValue('role', selectedRoleId);
+    }
+  }, [selectedRoleId, setValue]);
 
   const onSubmit = async (data: UserInviteFormData) => {
     try {
       setIsLoading(true);
       
-      const roleId = data.roleId ? parseInt(data.roleId) : undefined;
+      const roleId = data.role ? parseInt(data.role) : undefined;
+      const teamId = data.teamId ? parseInt(data.teamId) : undefined;
+      const departmentId = data.department_id ? parseInt(data.department_id) : undefined;
       
-      // Create a request that matches your backend API expectations
+      // Create a request that matches your backend API expectations - using the same format as RegisterUserPage
       const userData = {
         email: data.email,
-        first_name: data.firstName,
-        last_name: data.lastName,
+        first_name: data.first_name,
+        last_name: data.last_name,
         password: data.password,
         role_id: roleId,
-        is_active: true
+        team_id: teamId,
+        department_id: departmentId,
       };
       
+      console.log('Submitting with role_id:', roleId); // Debug log
+      
       // The backend should create the user and link it to the tenant
-      await addUserMutation.mutateAsync(userData as any);
+      await createUserMutation.mutateAsync(userData as any);
       
       showNotification(
         'success', 
@@ -101,18 +122,18 @@ const UserInviteForm: React.FC<UserInviteFormProps> = ({ tenantId, onSuccess }) 
         <div className="grid grid-cols-2 gap-4">
           <Input
             label="First Name"
-            {...register('firstName', {
+            {...register('first_name', {
               required: 'First name is required'
             })}
-            error={errors.firstName?.message}
+            error={errors.first_name?.message}
           />
 
           <Input
             label="Last Name"
-            {...register('lastName', {
+            {...register('last_name', {
               required: 'Last name is required'
             })}
-            error={errors.lastName?.message}
+            error={errors.last_name?.message}
           />
         </div>
 
@@ -161,16 +182,56 @@ const UserInviteForm: React.FC<UserInviteFormProps> = ({ tenantId, onSuccess }) 
 
         <Select
           label="Role"
-          {...register('roleId', {
-            required: 'Please select a role for this user'
+          {...register('role', {
+            required: 'Please select a role for this user',
+            onChange: (e) => {
+              console.log('Role changed to:', e.target.value); // Debug log
+              setSelectedRoleId(e.target.value);
+            }
           })}
-          error={errors.roleId?.message}
+          error={errors.role?.message}
           disabled={rolesLoading}
         >
           <option value="">Select a role</option>
           {roles?.map(role => (
             <option key={role.id} value={role.id}>
               {role.name}
+            </option>
+          ))}
+        </Select>
+
+        <Select
+          label="Team"
+          {...register('teamId', { required: 'Team is required' })}
+          error={errors.teamId?.message}
+          disabled={teamsLoading}
+          onChange={(e) => {
+            // Update the value in react-hook-form
+            setValue('teamId', e.target.value, { shouldValidate: true });
+          }}
+        >
+          <option value="">Select a team</option>
+          {teams?.map((team) => (
+            <option key={team.id} value={team.id}>
+              {team.name}
+            </option>
+          ))}
+        </Select>
+
+        <Select
+          label="Department"
+          {...register('department_id', { required: 'Department is required' })}
+          error={errors.department_id?.message}
+          disabled={departmentsLoading}
+          onChange={(e) => {
+            // Update the value in react-hook-form
+            setValue('department_id', e.target.value, { shouldValidate: true });
+          }}
+        >
+          <option value="">Select a department</option>
+          {departments?.map((department) => (
+            <option key={department.id} value={department.id}>
+              {department.name}
             </option>
           ))}
         </Select>

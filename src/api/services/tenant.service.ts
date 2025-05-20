@@ -30,7 +30,9 @@ export const getTenantUsers = async (
       user_id: user.id,
       tenant_id: tenantId,
       is_active: true,
-      role_id: user.role_id, 
+      role_id: user.role_id,
+      department_id : user.department_id,
+      team_id: user.team_id, 
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       user: {
@@ -38,6 +40,7 @@ export const getTenantUsers = async (
         first_name: user.first_name,
         last_name: user.last_name,
         email: user.email
+        
       }
     })),
     total: response.length,

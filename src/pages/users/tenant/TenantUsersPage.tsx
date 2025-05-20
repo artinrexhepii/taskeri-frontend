@@ -4,6 +4,8 @@ import { useTenantUsers } from '../../../api/hooks/tenants/useTenantUsers';
 import { useUpdateTenantUser } from '../../../api/hooks/tenants/useUpdateTenantUser';
 import { useRemoveTenantUser } from '../../../api/hooks/tenants/useRemoveTenantUser';
 import { useRoles } from '../../../api/hooks/roles/useRoles';
+import { useDepartments } from '../../../api/hooks/departments/useDepartments';
+import { useTeams } from '../../../api/hooks/teams/useTeams';
 import UserInviteForm from '../../../components/features/users/UserInviteForm';
 import { TenantUser, TenantUserUpdate } from '../../../types/tenant.types';
 import Button from '../../../components/common/Button/Button';
@@ -29,9 +31,20 @@ import { Role } from '../../../types/role.types';
 
 const getRoleName = (roleId?: number, roles?: Role[]): string => {
   if (!roleId || !roles || roles.length === 0) return 'No role assigned';
-  
   const role = roles.find(role => role.id === roleId);
   return role ? role.name : 'No role assigned';
+};
+
+const getDepartmentName = (departmentId?: number, departments?: any[]): string => {
+  if (!departmentId || !departments || departments.length === 0) return 'No department';
+  const department = departments.find(dept => dept.id === departmentId);
+  return department ? department.name : 'No department';
+};
+
+const getTeamName = (teamId?: number, teams?: any[]): string => {
+  if (!teamId || !teams || teams.length === 0) return 'No team';
+  const team = teams.find(team => team.id === teamId);
+  return team ? team.name : 'No team';
 };
 
 const TenantUsersPage: React.FC = () => {
@@ -44,7 +57,6 @@ const TenantUsersPage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState<string>('');
-  const [filterStatus, setFilterStatus] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
 
   // Get tenant ID from user context
@@ -55,6 +67,8 @@ const TenantUsersPage: React.FC = () => {
     pageSize
   });
   const { data: roles } = useRoles();
+  const { data: departments } = useDepartments();
+  const { data: teams } = useTeams();
   const updateUserMutation = useUpdateTenantUser();
   const removeUserMutation = useRemoveTenantUser();
 
@@ -65,11 +79,8 @@ const TenantUsersPage: React.FC = () => {
       user.user?.email?.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesRole = filterRole === '' || user.role_id?.toString() === filterRole;
-    const matchesStatus = filterStatus === '' || 
-      (filterStatus === 'active' && user.is_active) || 
-      (filterStatus === 'inactive' && !user.is_active);
     
-    return matchesSearch && matchesRole && matchesStatus;
+    return matchesSearch && matchesRole;
   });
 
   const toggleInviteForm = () => {
@@ -131,30 +142,6 @@ const TenantUsersPage: React.FC = () => {
     }
   };
 
-  const toggleUserStatus = async (tenantUser: TenantUser) => {
-    try {
-      await updateUserMutation.mutateAsync({
-        tenantId: tenantId,
-        userId: tenantUser.user_id,
-        data: { is_active: !tenantUser.is_active }
-      });
-      
-      showNotification(
-        'success',
-        'Status updated',
-        `User has been ${tenantUser.is_active ? 'deactivated' : 'activated'}`
-      );
-      
-      refetch();
-    } catch (error) {
-      showNotification(
-        'error',
-        'Update failed',
-        error instanceof Error ? error.message : 'Failed to update user status'
-      );
-    }
-  };
-
   const removeUser = async (tenantUser: TenantUser) => {
     if (window.confirm(`Are you sure you want to remove ${tenantUser.user?.first_name} ${tenantUser.user?.last_name}?`)) {
       try {
@@ -183,7 +170,6 @@ const TenantUsersPage: React.FC = () => {
   const resetFilters = () => {
     setSearchQuery('');
     setFilterRole('');
-    setFilterStatus('');
   };
 
   const exportUsers = () => {
@@ -269,18 +255,6 @@ const TenantUsersPage: React.FC = () => {
                   ))}
                 </Select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Status</label>
-                <Select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="w-full"
-                >
-                  <option value="">All Statuses</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </Select>
-              </div>
               <div className="flex items-end">
                 <Button
                   variant="outline"
@@ -325,11 +299,11 @@ const TenantUsersPage: React.FC = () => {
             <UserIcon className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-4 text-lg font-medium text-gray-900 ">No users found</h3>
             <p className="mt-1 text-gray-500">
-              {searchQuery || filterRole || filterStatus ? 
+              {searchQuery || filterRole ? 
                 'Try adjusting your search or filters to find what you\'re looking for.' : 
                 'Add a new user to get started.'}
             </p>
-            {(searchQuery || filterRole || filterStatus) && (
+            {(searchQuery || filterRole) && (
               <Button
                 variant="outline"
                 onClick={resetFilters}
@@ -353,14 +327,11 @@ const TenantUsersPage: React.FC = () => {
                         <h3 className="text-lg font-medium text-gray-900 ">
                           {tenantUser.user?.first_name} {tenantUser.user?.last_name}
                         </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-sm text-gray-500">
                           {tenantUser.user?.email}
                         </p>
                       </div>
                     </div>
-                    <span className={`px-3 py-1 inline-flex text-xs font-medium rounded-full ${getStatusBadgeClass(tenantUser.is_active)}`}>
-                      {tenantUser.is_active ? 'Active' : 'Inactive'}
-                    </span>
                   </div>
                   
                   <div className="mb-4">
@@ -400,7 +371,7 @@ const TenantUsersPage: React.FC = () => {
                       </div>
                     ) : (
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-gray-800 ">
+                        <span className="font-medium text-gray-800">
                           {getRoleName(tenantUser.role_id, roles)}
                         </span>
                         <Button
@@ -414,26 +385,30 @@ const TenantUsersPage: React.FC = () => {
                       </div>
                     )}
                   </div>
+
+                  <div className="mb-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Department</p>
+                    <p className="text-sm text-gray-800">
+                      {getDepartmentName(tenantUser.department_id, departments)}
+                    </p>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Team</p>
+                    <p className="text-sm text-gray-800">
+                      {getTeamName(tenantUser.team_id, teams)}
+                    </p>
+                  </div>
                   
                   <div className="mb-4">
                     <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Member Since</p>
-                    <p className="text-sm text-gray-800 ">
+                    <p className="text-sm text-gray-800">
                       {tenantUser.created_at ? formatDate(tenantUser.created_at) : 'N/A'}
                     </p>
                   </div>
                   
                   <div className="border-t border-gray-100 pt-4 mt-4">
-                    <div className="flex justify-between">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => toggleUserStatus(tenantUser)}
-                        className={tenantUser.is_active ? 
-                          'bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100' : 
-                          'bg-green-50 text-green-700 border-green-300 hover:bg-green-100'}
-                      >
-                        {tenantUser.is_active ? 'Deactivate' : 'Activate'}
-                      </Button>
+                    <div className="flex justify-end">
                       <Button
                         variant="outline"
                         size="sm"
