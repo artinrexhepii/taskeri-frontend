@@ -25,6 +25,14 @@ import {
   ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
 import { formatDate } from '../../../utils/formatters';
+import { Role } from '../../../types/role.types';
+
+const getRoleName = (roleId?: number, roles?: Role[]): string => {
+  if (!roleId || !roles || roles.length === 0) return 'No role assigned';
+  
+  const role = roles.find(role => role.id === roleId);
+  return role ? role.name : 'No role assigned';
+};
 
 const TenantUsersPage: React.FC = () => {
   const { user } = useAuth();
@@ -393,7 +401,7 @@ const TenantUsersPage: React.FC = () => {
                     ) : (
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-gray-800 ">
-                          {tenantUser.role?.name || 'No role assigned'}
+                          {getRoleName(tenantUser.role_id, roles)}
                         </span>
                         <Button
                           variant="ghost"
