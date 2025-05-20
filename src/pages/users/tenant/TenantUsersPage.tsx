@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useTenantUsers } from '../../../api/hooks/tenants/useTenantUsers';
-import { useRemoveTenantUser } from '../../../api/hooks/tenants/useRemoveTenantUser';
+import { useDeleteUser } from '../../../api/hooks/users/useDeleteUser';
 import { useRoles } from '../../../api/hooks/roles/useRoles';
 import { useDepartments } from '../../../api/hooks/departments/useDepartments';
 import { useTeams } from '../../../api/hooks/teams/useTeams';
@@ -66,7 +66,7 @@ const TenantUsersPage: React.FC = () => {
   const { data: roles } = useRoles();
   const { data: departments } = useDepartments();
   const { data: teams } = useTeams();
-  const removeUserMutation = useRemoveTenantUser();
+  const deleteUserMutation = useDeleteUser();
 
   // Filter users based on search query and filters
   const filteredUsers = tenantUsers?.items.filter(user => {
@@ -100,15 +100,12 @@ const TenantUsersPage: React.FC = () => {
   const removeUser = async (tenantUser: TenantUser) => {
     if (window.confirm(`Are you sure you want to remove ${tenantUser.user?.first_name} ${tenantUser.user?.last_name}?`)) {
       try {
-        await removeUserMutation.mutateAsync({
-          tenantId: tenantId,
-          userId: tenantUser.user_id
-        });
+        await deleteUserMutation.mutateAsync(tenantUser.user_id);
         
         showNotification(
           'success',
           'User removed',
-          'User has been removed from your company'
+          'User has been removed successfully'
         );
         
         refetch();
