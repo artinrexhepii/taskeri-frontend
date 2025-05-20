@@ -20,7 +20,6 @@ import {
 } from '@mui/material';
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 import { format } from 'date-fns';
-
 import { useProjects } from '../../api/hooks/projects/useProjects';
 import { useDeleteProject } from '../../api/hooks/projects/useDeleteProject';
 import { useTasks } from '../../api/hooks/tasks/useTasks';

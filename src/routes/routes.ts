@@ -89,12 +89,12 @@ export const routes: Routes = {
   // Task routes
   tasks: {
     path: '/tasks',
-    component: TaskList,
+    component: TaskBoard,
     protected: true
   },
-  taskBoard: {
-    path: '/tasks/board',
-    component: TaskBoard,
+  taskList: {
+    path: '/tasks/list',
+    component: TaskList,
     protected: true
   },
   taskCalendar: {
