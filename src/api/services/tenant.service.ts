@@ -1,7 +1,8 @@
 import apiClient from '../apiClient';
 import { API_ENDPOINTS } from '../endpoints';
-import { TenantUserCreate, TenantUserUpdate, TenantUser, TenantUserListResponse } from '../../types/tenant.types';
+import { TenantUserCreate, TenantUser, TenantUserListResponse } from '../../types/tenant.types';
 import { TenantRegisterRequest, RegisterResponse } from '../../types/auth.types';
+import { UserUpdate } from '../../types/user.types';
 
 /**
  * Register a new tenant (company) with an admin user
@@ -23,15 +24,13 @@ export const getTenantUsers = async (
   pageSize = 10
 ): Promise<TenantUserListResponse> => {
   const response = await apiClient.get<any[]>(`/users`);
-  // Transform the array response into the expected format
   return {
     items: response.map(user => ({
       id: user.id,
       user_id: user.id,
       tenant_id: tenantId,
-      is_active: true,
       role_id: user.role_id,
-      department_id : user.department_id,
+      department_id: user.department_id,
       team_id: user.team_id, 
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -40,12 +39,11 @@ export const getTenantUsers = async (
         first_name: user.first_name,
         last_name: user.last_name,
         email: user.email
-        
       }
     })),
     total: response.length,
-    page: 1,
-    page_size: response.length
+    page: page,
+    page_size: pageSize
   };
 };
 
@@ -62,18 +60,18 @@ export const addUserToTenant = async (
 };
 
 /**
- * Update a tenant user (role or active status)
+ * Update a tenant user's information
  * @param tenantId - ID of the tenant
  * @param userId - ID of the user to update
- * @param data - Update data (role or active status)
+ * @param data - User update data (email, first_name, last_name, department_id, team_id)
  */
 export const updateTenantUser = async (
   tenantId: number,
   userId: number,
-  data: TenantUserUpdate
+  data: UserUpdate
 ): Promise<TenantUser> => {
   return apiClient.put<TenantUser>(
-    `${API_ENDPOINTS.TENANTS.USERS(tenantId)}/${userId}`,
+    API_ENDPOINTS.USERS.DETAIL(userId),
     data
   );
 };

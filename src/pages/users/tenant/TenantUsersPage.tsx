@@ -1,25 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useTenantUsers } from '../../../api/hooks/tenants/useTenantUsers';
-import { useUpdateTenantUser } from '../../../api/hooks/tenants/useUpdateTenantUser';
 import { useRemoveTenantUser } from '../../../api/hooks/tenants/useRemoveTenantUser';
 import { useRoles } from '../../../api/hooks/roles/useRoles';
 import { useDepartments } from '../../../api/hooks/departments/useDepartments';
 import { useTeams } from '../../../api/hooks/teams/useTeams';
 import UserInviteForm from '../../../components/features/users/UserInviteForm';
-import { TenantUser, TenantUserUpdate } from '../../../types/tenant.types';
+import EditUserForm from '../../../components/features/users/EditUserForm';
+import { TenantUser } from '../../../types/tenant.types';
 import Button from '../../../components/common/Button/Button';
 import Card from '../../../components/common/Card/Card';
 import Select from '../../../components/common/Select/Select';
-import Input from '../../../components/common/Input/Input';
 import { useNotification } from '../../../context/NotificationContext';
 import { 
   XMarkIcon, 
   UserPlusIcon, 
   UserIcon, 
   PencilIcon, 
-  TrashIcon, 
-  CheckCircleIcon,
+  TrashIcon,
   MagnifyingGlassIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -51,10 +49,9 @@ const TenantUsersPage: React.FC = () => {
   const { user } = useAuth();
   const { showNotification } = useNotification();
   const [showInviteForm, setShowInviteForm] = useState(false);
-  const [editingUserId, setEditingUserId] = useState<number | null>(null);
+  const [editingUser, setEditingUser] = useState<TenantUser | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
-  const [selectedRole, setSelectedRole] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
@@ -69,7 +66,6 @@ const TenantUsersPage: React.FC = () => {
   const { data: roles } = useRoles();
   const { data: departments } = useDepartments();
   const { data: teams } = useTeams();
-  const updateUserMutation = useUpdateTenantUser();
   const removeUserMutation = useRemoveTenantUser();
 
   // Filter users based on search query and filters
@@ -92,54 +88,13 @@ const TenantUsersPage: React.FC = () => {
     refetch();
   };
 
-  const getStatusBadgeClass = (isActive: boolean) => {
-    return isActive
-      ? 'bg-green-100 text-green-800'
-      : 'bg-red-100 text-red-800';
+  const startEditing = (user: TenantUser) => {
+    setEditingUser(user);
   };
 
-  const startEditing = (tenantUser: TenantUser) => {
-    setEditingUserId(tenantUser.id);
-    setSelectedRole(tenantUser.role_id?.toString() || '');
-  };
-
-  const cancelEditing = () => {
-    setEditingUserId(null);
-    setSelectedRole('');
-  };
-
-  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedRole(e.target.value);
-  };
-
-  const saveUserChanges = async (tenantUser: TenantUser) => {
-    try {
-      const updateData: TenantUserUpdate = {};
-      
-      if (selectedRole) {
-        updateData.role_id = parseInt(selectedRole);
-      }
-      
-      await updateUserMutation.mutateAsync({
-        tenantId: tenantId,
-        userId: tenantUser.user_id,
-        data: updateData
-      });
-      
-      showNotification(
-        'success',
-        'User updated',
-        'User role has been updated successfully'
-      );
-      
-      cancelEditing();
-    } catch (error) {
-      showNotification(
-        'error',
-        'Update failed',
-        error instanceof Error ? error.message : 'Failed to update user'
-      );
-    }
+  const handleEditSuccess = () => {
+    setEditingUser(null);
+    refetch();
   };
 
   const removeUser = async (tenantUser: TenantUser) => {
@@ -173,7 +128,6 @@ const TenantUsersPage: React.FC = () => {
   };
 
   const exportUsers = () => {
-    // Placeholder for future export functionality
     showNotification(
       'info',
       'Export',
@@ -287,6 +241,20 @@ const TenantUsersPage: React.FC = () => {
         </Card>
       )}
 
+      {/* Edit User Modal */}
+      {editingUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-2xl">
+            <EditUserForm
+              user={editingUser}
+              tenantId={tenantId}
+              onClose={() => setEditingUser(null)}
+              onSuccess={handleEditSuccess}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Users List */}
       <div className="space-y-6">
         {isLoading ? (
@@ -324,7 +292,7 @@ const TenantUsersPage: React.FC = () => {
                         <UserIcon className="h-6 w-6 text-primary" />
                       </div>
                       <div className="ml-4">
-                        <h3 className="text-lg font-medium text-gray-900 ">
+                        <h3 className="text-lg font-medium text-gray-900">
                           {tenantUser.user?.first_name} {tenantUser.user?.last_name}
                         </h3>
                         <p className="text-sm text-gray-500">
@@ -332,58 +300,21 @@ const TenantUsersPage: React.FC = () => {
                         </p>
                       </div>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => startEditing(tenantUser)}
+                      className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                    >
+                      <PencilIcon className="h-4 w-4" />
+                    </Button>
                   </div>
                   
                   <div className="mb-4">
                     <p className="text-xs text-gray-900 uppercase tracking-wider mb-1">Role</p>
-                    {editingUserId === tenantUser.id ? (
-                      <div className="space-y-2">
-                        <Select
-                          value={selectedRole}
-                          onChange={handleRoleChange}
-                          className="w-full"
-                        >
-                          <option value="">Select a role</option>
-                          {roles?.map((role) => (
-                            <option key={role.id} value={role.id}>
-                              {role.name}
-                            </option>
-                          ))}
-                        </Select>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => saveUserChanges(tenantUser)}
-                            className="w-full"
-                          >
-                            Save
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={cancelEditing}
-                            className="w-full bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-gray-800">
-                          {getRoleName(tenantUser.role_id, roles)}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => startEditing(tenantUser)}
-                          className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-                        >
-                          <PencilIcon className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    )}
+                    <p className="text-sm font-medium text-gray-800">
+                      {getRoleName(tenantUser.role_id, roles)}
+                    </p>
                   </div>
 
                   <div className="mb-4">

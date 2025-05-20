@@ -94,7 +94,7 @@ export const API_ENDPOINTS = {
     // User roles endpoints
     USER_ROLES: {
       USER_ROLES: (userId: number) => `/user-roles/${userId}/roles`,
-      ADD_ROLE: (userId: number, roleId: number) => `/user-roles/${userId}/roles/${roleId}`,
+      ASSIGN_ROLE: (userId: number, roleId: number) => `/user-roles/${userId}/roles/${roleId}`,
     },
     
     // Role permissions endpoints
