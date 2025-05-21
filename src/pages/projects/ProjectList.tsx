@@ -21,6 +21,9 @@ import {
   InputAdornment,
   Avatar,
   Tooltip,
+  Paper,
+  Fade,
+  Grow,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -29,6 +32,7 @@ import {
   Search as SearchIcon,
   FolderOpen as ProjectIcon,
   ArrowForward as ArrowForwardIcon,
+  FilterList as FilterListIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useProjects } from '../../api/hooks/projects/useProjects';
@@ -36,6 +40,7 @@ import { ProjectStatus } from '../../types/project.types';
 import { format } from 'date-fns';
 import { useDeleteProject } from '../../api/hooks/projects/useDeleteProject';
 import { useAuth } from '../../context/AuthContext';
+import { motion } from 'framer-motion';
 
 export default function ProjectList() {
   const navigate = useNavigate();
@@ -100,214 +105,290 @@ export default function ProjectList() {
     );
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.5
+      }
+    }
+  };
+
   return (
     <Container maxWidth="xl">
-      <Stack spacing={3}>
-        <Card sx={{ p: 3, backgroundColor: 'primary.main', color: 'primary.contrastText' }}>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Box>
-              <Typography variant="h4" sx={{ mb: 1 }}>Projects</Typography>
-              <Typography variant="body2" sx={{ opacity: 0.7 }}>
-                Manage and track all your projects
-              </Typography>
-            </Box>
-            {hasAdminPrivileges && (
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => navigate('/projects/new')}
-                sx={{
-                  bgcolor: 'white',
-                  color: 'primary.main',
-                  '&:hover': {
-                    bgcolor: 'grey.100',
-                  }
-                }}
-              >
-                New Project
-              </Button>
-            )}
-          </Box>
-        </Card>
-
-        <Card>
-          <Box p={3}>
-            <Grid container spacing={2} alignItems="center">
-              <Grid sx={{ width: { xs: '100%', md: '60%' } }}>
-                <TextField
-                  fullWidth
-                  placeholder="Search projects..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-              <Grid sx={{ width: { xs: '100%', md: '40%' } }}>
-                <Select
-                  fullWidth
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  sx={{ bgcolor: 'background.paper' }}
-                >
-                  <MenuItem value="all">All Statuses</MenuItem>
-                  {statusOptions.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      <Chip
-                        size="small"
-                        {...getStatusChipProps(option.value as ProjectStatus)}
-                        sx={{ minWidth: 100 }}
-                      />
-                    </MenuItem>
-                  ))}
-                </Select>
-              </Grid>
-            </Grid>
-          </Box>
-
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Project</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Timeline</TableCell>
-                  <TableCell align="right">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredProjects?.map((project) => (
-                  <TableRow
-                    key={project.id}
-                    hover
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <Stack spacing={3}>
+          <motion.div variants={itemVariants}>
+            <Card 
+              sx={{ 
+                p: 3, 
+                background: 'linear-gradient(135deg, primary.main 0%, primary.dark 100%)',
+                color: 'white',
+                boxShadow: 3,
+              }}
+            >
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Box>
+                  <Typography variant="h4" sx={{ mb: 1, fontWeight: 'bold', color: 'black' }}>Projects</Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9, color: 'black' }}>
+                    Manage and track all your projects
+                  </Typography>
+                </Box>
+                {hasAdminPrivileges && (
+                  <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => navigate('/projects/new')}
                     sx={{
-                      cursor: 'pointer',
-                      '&:hover': { bgcolor: 'action.hover' }
+                      bgcolor: 'white',
+                      color: 'primary.main',
+                      '&:hover': {
+                        bgcolor: 'grey.100',
+                        transform: 'translateY(-2px)',
+                        boxShadow: 4,
+                      },
+                      transition: 'all 0.2s ease-in-out',
                     }}
-                    onClick={() => navigate(`/projects/${project.id}`)}
                   >
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Avatar
-                          sx={{
-                            bgcolor: 'primary.light',
-                            mr: 2,
-                            width: 40,
-                            height: 40
-                          }}
-                        >
-                          <ProjectIcon />
-                        </Avatar>
-                        <Typography variant="subtitle2">
-                          {project.name}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: 'text.secondary',
-                          display: '-webkit-box',
-                          overflow: 'hidden',
-                          WebkitBoxOrient: 'vertical',
-                          WebkitLineClamp: 2
-                        }}
-                      >
-                        {project.description || 'No description'}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        {...getStatusChipProps(project.status)}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Stack spacing={0.5}>
-                        <Typography variant="caption" color="text.secondary">
-                          Start: {project.start_date && format(new Date(project.start_date), 'MMM dd, yyyy')}
-                        </Typography>
-                        {project.end_date && (
-                          <Typography variant="caption" color="text.secondary">
-                            End: {format(new Date(project.end_date), 'MMM dd, yyyy')}
-                          </Typography>
-                        )}
-                      </Stack>
-                    </TableCell>
-                    <TableCell align="right">
-                      <Stack direction="row" spacing={1} justifyContent="flex-end">
-                        {hasAdminPrivileges && (
-                          <>
-                            <Tooltip title="Edit Project">
-                              <IconButton
-                                size="small"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate(`/projects/${project.id}`);
-                                }}
-                                sx={{ color: 'primary.main' }}
-                              >
-                                <EditIcon />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Delete Project">
-                              <IconButton
-                                size="small"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDelete(project.id);
-                                }}
-                                sx={{ color: 'error.main' }}
-                              >
-                                <DeleteIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </>
-                        )}
-                        {!hasAdminPrivileges && (
-                          <Tooltip title="View Project">
-                            <IconButton
-                              size="small"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/projects/${project.id}`);
-                              }}
-                              sx={{ color: 'primary.main' }}
-                            >
-                              <ArrowForwardIcon />
-                            </IconButton>
-                          </Tooltip>
-                        )}
-                      </Stack>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {filteredProjects?.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={5}>
-                      <Box sx={{ py: 3, textAlign: 'center' }}>
-                        <Typography variant="subtitle1" color="text.secondary">
-                          No projects found
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                          Try adjusting your search or filter to find what you're looking for
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
+                    New Project
+                  </Button>
                 )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Card>
-      </Stack>
+              </Box>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={itemVariants}>
+            <Card sx={{ boxShadow: 3 }}>
+              <Box p={3}>
+                <Grid container spacing={2} alignItems="center">
+                  <Grid sx={{ width: { xs: '100%', md: '50%' } }}>
+                    <TextField
+                      fullWidth
+                      placeholder="Search projects..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon sx={{ color: 'text.primary' }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          '&:hover fieldset': {
+                            borderColor: 'primary.main',
+                          },
+                          '& .MuiInputBase-input': {
+                            color: 'text.primary',
+                          },
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid sx={{ width: { xs: '100%', md: '50%' } }}>
+                    <Select
+                      fullWidth
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      startAdornment={
+                        <InputAdornment position="start">
+                          <FilterListIcon sx={{ color: 'text.primary' }} />
+                        </InputAdornment>
+                      }
+                      sx={{
+                        bgcolor: 'background.paper',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'divider',
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'primary.main',
+                        },
+                        '& .MuiSelect-select': {
+                          color: 'text.primary',
+                        },
+                      }}
+                    >
+                      <MenuItem value="all">All Statuses</MenuItem>
+                      {statusOptions.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          <Chip
+                            size="small"
+                            {...getStatusChipProps(option.value as ProjectStatus)}
+                            sx={{ minWidth: 100 }}
+                          />
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </Grid>
+                </Grid>
+              </Box>
+
+              <TableContainer component={Paper} elevation={0}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 'bold', color: 'text.primary' }}>Project</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: 'text.primary' }}>Description</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: 'text.primary' }}>Status</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: 'text.primary' }}>Timeline</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 'bold', color: 'text.primary' }}>Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {filteredProjects?.map((project, index) => (
+                      <Grow
+                        key={project.id}
+                        in={true}
+                        style={{ transformOrigin: '0 0 0' }}
+                        timeout={1000 + index * 100}
+                      >
+                        <TableRow
+                          hover
+                          sx={{
+                            cursor: 'pointer',
+                            '&:hover': { 
+                              bgcolor: 'action.hover',
+                              transform: 'translateY(-2px)',
+                              transition: 'all 0.2s ease-in-out',
+                            }
+                          }}
+                          onClick={() => navigate(`/projects/${project.id}`)}
+                        >
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <Avatar
+                                sx={{
+                                  bgcolor: 'primary.light',
+                                  mr: 2,
+                                  width: 40,
+                                  height: 40,
+                                  boxShadow: 2,
+                                }}
+                              >
+                                <ProjectIcon />
+                              </Avatar>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 'medium', color: 'text.primary' }}>
+                                {project.name}
+                              </Typography>
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" sx={{ color: 'text.primary' }} noWrap>
+                              {project.description || 'No description'}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              {...getStatusChipProps(project.status)}
+                              size="small"
+                              sx={{ 
+                                fontWeight: 'medium',
+                                '& .MuiChip-label': { px: 1 }
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                              {project.start_date && format(new Date(project.start_date), 'MMM dd, yyyy')}
+                              {project.end_date && ` - ${format(new Date(project.end_date), 'MMM dd, yyyy')}`}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="right">
+                            <Stack direction="row" spacing={1} justifyContent="flex-end">
+                              {hasAdminPrivileges && (
+                                <>
+                                  <Tooltip title="Edit Project">
+                                    <IconButton
+                                      size="small"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(`/projects/${project.id}/edit`);
+                                      }}
+                                      sx={{ 
+                                        color: 'primary.main',
+                                        '&:hover': { bgcolor: 'primary.lighter' }
+                                      }}
+                                    >
+                                      <EditIcon />
+                                    </IconButton>
+                                  </Tooltip>
+                                  <Tooltip title="Delete Project">
+                                    <IconButton
+                                      size="small"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDelete(project.id);
+                                      }}
+                                      sx={{ 
+                                        color: 'error.main',
+                                        '&:hover': { bgcolor: 'error.lighter' }
+                                      }}
+                                    >
+                                      <DeleteIcon />
+                                    </IconButton>
+                                  </Tooltip>
+                                </>
+                              )}
+                              {!hasAdminPrivileges && (
+                                <Tooltip title="View Project">
+                                  <IconButton
+                                    size="small"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigate(`/projects/${project.id}`);
+                                    }}
+                                    sx={{ 
+                                      color: 'primary.main',
+                                      '&:hover': { bgcolor: 'primary.lighter' }
+                                    }}
+                                  >
+                                    <ArrowForwardIcon />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      </Grow>
+                    ))}
+                    {filteredProjects?.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={5}>
+                          <Box sx={{ py: 3, textAlign: 'center' }}>
+                            <Typography variant="subtitle1" sx={{ color: 'text.primary' }}>
+                              No projects found
+                            </Typography>
+                            <Typography variant="body2" sx={{ mt: 1, color: 'text.primary' }}>
+                              Try adjusting your search or filter to find what you're looking for
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Card>
+          </motion.div>
+        </Stack>
+      </motion.div>
     </Container>
   );
 }
