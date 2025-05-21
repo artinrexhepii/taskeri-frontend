@@ -8,6 +8,7 @@ import {
   Typography,
   Container,
 } from '@mui/material';
+import { useAuth } from '../../context/AuthContext';
 
 import LeaveRequestForm from './LeaveRequestForm';
 import LeaveRequestList from './LeaveRequestList';
@@ -37,11 +38,40 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function LeaveManagementTabs() {
+  const { user } = useAuth();
   const [tabValue, setTabValue] = useState(0);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
+
+  // Define which tabs should be visible based on role
+  const isAdmin = user?.role_id === 1;
+  const isManager = user?.role_id === 2;
+  const isEmployee = user?.role_id === 3;
+
+  const getTabs = () => {
+    if (isAdmin) {
+      return [{ label: "Admin Approval", component: <AdminLeaveActions /> }];
+    }
+    
+    if (isManager) {
+      return [
+        { label: "Create Request", component: <LeaveRequestForm /> },
+        { label: "My Requests", component: <UserLeaveRequests /> },
+        { label: "All Requests", component: <LeaveRequestList /> },
+        { label: "Admin Approval", component: <AdminLeaveActions /> }
+      ];
+    }
+    
+    // Employee (role_id 3) or default case
+    return [
+      { label: "Create Request", component: <LeaveRequestForm /> },
+      { label: "My Requests", component: <UserLeaveRequests /> }
+    ];
+  };
+
+  const tabs = getTabs();
 
   return (
     <Container maxWidth="lg">
@@ -50,29 +80,23 @@ export default function LeaveManagementTabs() {
 
         <Card>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs value={tabValue} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
-              <Tab label="Create Request" />
-              <Tab label="My Requests" />
-              <Tab label="All Requests" />
-              <Tab label="Admin Approval" />
+            <Tabs 
+              value={tabValue} 
+              onChange={handleTabChange} 
+              variant="scrollable" 
+              scrollButtons="auto"
+            >
+              {tabs.map((tab, index) => (
+                <Tab key={index} label={tab.label} />
+              ))}
             </Tabs>
           </Box>
 
-          <TabPanel value={tabValue} index={0}>
-            <LeaveRequestForm />
-          </TabPanel>
-
-          <TabPanel value={tabValue} index={1}>
-            <UserLeaveRequests />
-          </TabPanel>
-
-          <TabPanel value={tabValue} index={2}>
-            <LeaveRequestList />
-          </TabPanel>
-
-          <TabPanel value={tabValue} index={3}>
-            <AdminLeaveActions />
-          </TabPanel>
+          {tabs.map((tab, index) => (
+            <TabPanel key={index} value={tabValue} index={index}>
+              {tab.component}
+            </TabPanel>
+          ))}
         </Card>
       </Stack>
     </Container>
