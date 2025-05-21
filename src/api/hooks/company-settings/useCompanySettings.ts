@@ -6,7 +6,7 @@ import { CompanySettingsResponse } from '../../../types/company.types';
 export const useCompanySettings = (companyId: number | null) => {
   return useQuery<CompanySettingsResponse, Error>({
     queryKey: ['company-settings', companyId],
-    queryFn: () => getCompanySettings(companyId!), // `!` because it's guarded by `enabled`
-    enabled: !!companyId, // ✅ prevents call when companyId is 0 or null
+    queryFn: () => getCompanySettings(companyId!),
+    enabled: !!companyId,
   });
 };
