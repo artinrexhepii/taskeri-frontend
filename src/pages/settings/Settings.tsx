@@ -1,8 +1,8 @@
-import { useState } from 'react';
+// src/pages/settings/Settings.tsx
+import { useEffect, useState } from 'react';
 import {
   Box,
   Card,
-  Grid,
   Stack,
   Tab,
   Tabs,
@@ -22,9 +22,7 @@ interface TabPanelProps {
   value: number;
 }
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
+function TabPanel({ children, value, index, ...other }: TabPanelProps) {
   return (
     <div
       role="tabpanel"
@@ -40,20 +38,18 @@ function TabPanel(props: TabPanelProps) {
 
 export default function Settings() {
   const [tabValue, setTabValue] = useState(0);
-  const { data: company, isLoading: isLoadingCompany } = useCompany();
-  const { data: settings, isLoading: isLoadingSettings } = useCompanySettings(company?.[0]?.id || 0);
-  const updateSettings = useUpdateCompanySettings();
+  const { data: companies, isLoading: isLoadingCompany } = useCompany();
 
+  // Tab 1: Create Settings
+  const [createCompanyId, setCreateCompanyId] = useState<number | null>(null);
   const [formData, setFormData] = useState<CompanySettingsUpdate>({
-    timezone: settings?.timezone || '',
-    work_hours_per_day: settings?.work_hours_per_day || 8,
+    timezone: '',
+    work_hours_per_day: 8,
   });
 
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
+  const updateSettings = useUpdateCompanySettings();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCreateInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -61,19 +57,44 @@ export default function Settings() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (company?.[0]?.id) {
+    if (createCompanyId) {
       updateSettings.mutate({
-        id: company[0].id,
+        id: createCompanyId,
         settingsData: formData,
       });
     }
   };
 
-  if (isLoadingCompany || isLoadingSettings) {
-    return <Typography>Loading...</Typography>;
-  }
+  // Tab 2: View Settings
+  const [viewCompanyId, setViewCompanyId] = useState<number | null>(null);
+  const [triggerView, setTriggerView] = useState(false);
+
+  const {
+    data: viewSettings,
+    isLoading: isLoadingViewSettings,
+    refetch: refetchViewSettings,
+  } = useCompanySettings(viewCompanyId);
+
+  useEffect(() => {
+    if (triggerView && viewCompanyId) {
+      refetchViewSettings();
+      setTriggerView(false);
+    }
+  }, [triggerView, viewCompanyId, refetchViewSettings]);
+
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  const handleFetchViewSettings = () => {
+    if (viewCompanyId) {
+      setTriggerView(true);
+    }
+  };
+
+  if (isLoadingCompany) return <Typography>Loading companies...</Typography>;
 
   return (
     <Stack spacing={3}>
@@ -82,58 +103,101 @@ export default function Settings() {
       <Card>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={tabValue} onChange={handleTabChange}>
-            <Tab label="Company Settings" />
-            <Tab label="User Preferences" />
+            <Tab label="Create Settings" />
+            <Tab label="View Settings" />
           </Tabs>
         </Box>
 
+        {/* Tab 1: Create Settings */}
         <TabPanel value={tabValue} index={0}>
-          <form onSubmit={handleSubmit}>
-            <Grid container spacing={3}>
-            <Grid sx={{ width: { xs: '100%', md: '50%' } }}>
-                <TextField
-                  fullWidth
-                  label="Timezone"
-                  name="timezone"
-                  value={formData.timezone}
-                  onChange={handleInputChange}
-                  select
-                >
-                  <MenuItem value="UTC">UTC</MenuItem>
-                  <MenuItem value="America/New_York">Eastern Time</MenuItem>
-                  <MenuItem value="America/Chicago">Central Time</MenuItem>
-                  <MenuItem value="America/Denver">Mountain Time</MenuItem>
-                  <MenuItem value="America/Los_Angeles">Pacific Time</MenuItem>
-                </TextField>
-              </Grid>
-              <Grid sx={{ width: { xs: '100%', md: '50%' } }}>
-                <TextField
-                  fullWidth
-                  label="Work Hours Per Day"
-                  name="work_hours_per_day"
-                  type="number"
-                  value={formData.work_hours_per_day}
-                  onChange={handleInputChange}
-                  inputProps={{ min: 1, max: 24 }}
-                />
-              </Grid>
-              <Grid sx={{ width: '100%' }}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={updateSettings.isPending}
-                >
-                  Save Changes
-                </Button>
-              </Grid>
-            </Grid>
+          <form onSubmit={handleCreateSubmit}>
+            <Stack spacing={2}>
+              <TextField
+                fullWidth
+                select
+                label="Select Company"
+                value={createCompanyId || ''}
+                onChange={(e) => setCreateCompanyId(Number(e.target.value))}
+              >
+                {companies?.map((c: any) => (
+                  <MenuItem key={c.id} value={c.id}>
+                    {c.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+
+              <TextField
+                fullWidth
+                label="Timezone"
+                name="timezone"
+                value={formData.timezone}
+                onChange={handleCreateInputChange}
+                select
+              >
+                <MenuItem value="UTC">UTC</MenuItem>
+                <MenuItem value="America/New_York">Eastern Time</MenuItem>
+                <MenuItem value="America/Chicago">Central Time</MenuItem>
+                <MenuItem value="America/Denver">Mountain Time</MenuItem>
+                <MenuItem value="America/Los_Angeles">Pacific Time</MenuItem>
+              </TextField>
+
+              <TextField
+                fullWidth
+                label="Work Hours Per Day"
+                name="work_hours_per_day"
+                type="number"
+                value={formData.work_hours_per_day}
+                onChange={handleCreateInputChange}
+                inputProps={{ min: 1, max: 24 }}
+              />
+
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={updateSettings.isPending || !createCompanyId}
+              >
+                Save Settings
+              </Button>
+            </Stack>
           </form>
         </TabPanel>
 
+        {/* Tab 2: View Settings */}
         <TabPanel value={tabValue} index={1}>
-          <Typography>User preferences coming soon...</Typography>
+          <Stack spacing={2}>
+            <TextField
+              fullWidth
+              select
+              label="Select Company"
+              value={viewCompanyId || ''}
+              onChange={(e) => setViewCompanyId(Number(e.target.value))}
+            >
+              {companies?.map((c: any) => (
+                <MenuItem key={c.id} value={c.id}>
+                  {c.name}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            <Button
+              variant="outlined"
+              onClick={handleFetchViewSettings}
+              disabled={!viewCompanyId}
+            >
+              Load Settings
+            </Button>
+
+            {isLoadingViewSettings && <Typography>Loading settings...</Typography>}
+
+            {viewSettings && (
+              <Box>
+                <Typography><strong>Timezone:</strong> {viewSettings.timezone}</Typography>
+                <Typography><strong>Work Hours Per Day:</strong> {viewSettings.work_hours_per_day}</Typography>
+              </Box>
+            )}
+          </Stack>
         </TabPanel>
       </Card>
     </Stack>
   );
-} 
+}
