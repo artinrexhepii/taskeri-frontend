@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import {
-  Box,
   Button,
   Card,
   Container,
   Stack,
-  Typography,
   IconButton,
   Menu,
   MenuItem,
@@ -71,10 +69,10 @@ const getPriorityColor = (priority: TaskPriority) => {
 
 // Define normalized status IDs
 const COLUMN_IDS = {
-  TODO: 'TODO',
-  IN_PROGRESS: 'IN_PROGRESS',
-  TECHNICAL_REVIEW: 'TECHNICAL_REVIEW',
-  DONE: 'DONE'
+  TODO: 'To Do',
+  IN_PROGRESS: 'In Progress',
+  TECHNICAL_REVIEW: 'Technical Review',
+  DONE: 'Done'
 } as const;
 
 export default function TaskBoard() {
