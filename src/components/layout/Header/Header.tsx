@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { 
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import {
   MagnifyingGlassIcon,
   BellIcon,
   Bars3Icon,
   UserCircleIcon,
   CogIcon,
-  ArrowRightOnRectangleIcon
-} from '@heroicons/react/24/outline';
-import { useAuth } from '../../../context/AuthContext';
-import { useNotifications } from '../../../api/hooks/notifications/useNotifications';
-import { formatUserName } from '../../../utils/formatters';
+  ArrowRightOnRectangleIcon,
+} from "@heroicons/react/24/outline";
+// import { Drawer } from "@mui/material";
+import { useAuth } from "../../../context/AuthContext";
+import { useNotifications } from "../../../api/hooks/notifications/useNotifications";
+import { formatUserName } from "../../../utils/formatters";
+import RightDrawer from "../../common/Drawer/Drawer";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -19,11 +21,11 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { user, logout } = useAuth();
-  const { data: notifications } = useNotifications();
-  const unreadCount = notifications?.items?.filter(n => !n.is_read).length || 0;
+  const { data: notifications } = useNotifications(true);
+  const unreadCount = notifications?.filter((n) => !n.is_read).length || 0;
 
   // Format the user's full name using the formatter utility
-  const fullName = user ? formatUserName(user.first_name, user.last_name) : '';
+  const fullName = user ? formatUserName(user.first_name, user.last_name) : "";
 
   return (
     <header className="sticky top-0 z-40 bg-primary text-white dark:bg-gray-800 border-b border-primary-600 dark:border-gray-700 shadow-md">
@@ -36,7 +38,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           >
             <Bars3Icon className="h-6 w-6" />
           </button>
-          
+
           {/* Search bar - hidden on mobile */}
           <div className="hidden md:flex items-center flex-1 ml-4">
             <div className="relative w-full">
@@ -54,14 +56,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         <div className="flex items-center space-x-4">
           {/* Notifications */}
           <div className="relative">
-            <button className="p-2 rounded-md text-white hover:bg-primary-dark dark:text-gray-400 dark:hover:bg-gray-700">
-              <BellIcon className="h-6 w-6" />
-              {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 h-4 w-4 text-xs font-medium flex items-center justify-center bg-red-500 text-white rounded-full">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
+            <RightDrawer
+              unreadCount={unreadCount}
+              notifications={notifications || []}
+            />
           </div>
 
           {/* Profile dropdown */}
