@@ -299,79 +299,77 @@ export default function TeamDetail() {
                   {teamMembers.length > 0 ? (
                     <List>
                       {teamMembers.map((member: UserBasicInfo, index) => (
-                        <Grow
+                        <motion.div
                           key={member.id}
-                          in={true}
-                          style={{ transformOrigin: '0 0 0' }}
-                          timeout={1000 + index * 100}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.5, delay: index * 0.1 }}
                         >
-                          <Fragment>
-                            <ListItem
-                              sx={{
-                                transition: 'all 0.2s ease-in-out',
-                                '&:hover': {
-                                  bgcolor: alpha('#0EA5E9', 0.04),
-                                  transform: 'translateX(4px)',
-                                }
-                              }}
-                              secondaryAction={
-                                <Tooltip title="Send email">
-                                  <IconButton 
-                                    edge="end" 
-                                    onClick={() => window.location.href = `mailto:${member.email}`}
-                                    sx={{ 
-                                      color: 'primary.main',
-                                      '&:hover': {
-                                        bgcolor: 'primary.lighter',
-                                        transform: 'scale(1.1)',
-                                      },
-                                      transition: 'all 0.2s ease-in-out',
-                                    }}
-                                  >
-                                    <EmailIcon />
-                                  </IconButton>
-                                </Tooltip>
+                          <ListItem
+                            sx={{
+                              transition: 'all 0.2s ease-in-out',
+                              '&:hover': {
+                                bgcolor: alpha('#0EA5E9', 0.04),
+                                transform: 'translateX(4px)',
                               }
-                            >
-                              <ListItemAvatar>
-                                <Avatar 
+                            }}
+                            secondaryAction={
+                              <Tooltip title="Send email">
+                                <IconButton 
+                                  edge="end" 
+                                  onClick={() => window.location.href = `mailto:${member.email}`}
                                   sx={{ 
-                                    bgcolor: alpha('#0EA5E9', 0.1),
-                                    color: '#0EA5E9',
-                                    transition: 'all 0.2s ease-in-out',
+                                    color: 'primary.main',
                                     '&:hover': {
+                                      bgcolor: 'primary.lighter',
                                       transform: 'scale(1.1)',
-                                    }
+                                    },
+                                    transition: 'all 0.2s ease-in-out',
                                   }}
                                 >
-                                  {member.first_name?.[0]}{member.last_name?.[0]}
-                                </Avatar>
-                              </ListItemAvatar>
-                              <ListItemText
-                                primary={
-                                  <Typography 
-                                    sx={{ 
-                                      color: 'text.primary',
-                                      fontWeight: 'medium',
-                                    }}
-                                  >
-                                    {`${member.first_name} ${member.last_name}`}
-                                  </Typography>
-                                }
-                                secondary={
-                                  <Typography 
-                                    sx={{ 
-                                      color: 'text.secondary',
-                                    }}
-                                  >
-                                    {member.email}
-                                  </Typography>
-                                }
-                              />
-                            </ListItem>
-                            <Divider component="li" />
-                          </Fragment>
-                        </Grow>
+                                  <EmailIcon />
+                                </IconButton>
+                              </Tooltip>
+                            }
+                          >
+                            <ListItemAvatar>
+                              <Avatar 
+                                sx={{ 
+                                  bgcolor: alpha('#0EA5E9', 0.1),
+                                  color: '#0EA5E9',
+                                  transition: 'all 0.2s ease-in-out',
+                                  '&:hover': {
+                                    transform: 'scale(1.1)',
+                                  }
+                                }}
+                              >
+                                {member.first_name?.[0]}{member.last_name?.[0]}
+                              </Avatar>
+                            </ListItemAvatar>
+                            <ListItemText
+                              primary={
+                                <Typography 
+                                  sx={{ 
+                                    color: 'text.primary',
+                                    fontWeight: 'medium',
+                                  }}
+                                >
+                                  {`${member.first_name} ${member.last_name}`}
+                                </Typography>
+                              }
+                              secondary={
+                                <Typography 
+                                  sx={{ 
+                                    color: 'text.secondary',
+                                  }}
+                                >
+                                  {member.email}
+                                </Typography>
+                              }
+                            />
+                          </ListItem>
+                          <Divider component="li" />
+                        </motion.div>
                       ))}
                     </List>
                   ) : (

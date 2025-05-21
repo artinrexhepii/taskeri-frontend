@@ -236,111 +236,109 @@ export default function TeamList() {
                 </TableHead>
                 <TableBody>
                   {filteredTeams?.map((team, index) => (
-                    <Grow
+                    <TableRow 
                       key={team.id}
-                      in={true}
-                      style={{ transformOrigin: '0 0 0' }}
-                      timeout={1000 + index * 100}
+                      hover
+                      onClick={() => handleTeamClick(team.id)}
+                      component={motion.tr}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                      sx={{ 
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease-in-out',
+                        '&:hover': {
+                          bgcolor: alpha('#0EA5E9', 0.04),
+                          transform: 'translateY(-2px)',
+                        }
+                      }}
                     >
-                      <TableRow 
-                        hover
-                        onClick={() => handleTeamClick(team.id)}
-                        sx={{ 
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease-in-out',
-                          '&:hover': {
-                            bgcolor: alpha('#0EA5E9', 0.04),
-                            transform: 'translateY(-2px)',
-                          }
-                        }}
-                      >
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Avatar 
-                              sx={{ 
-                                bgcolor: alpha('#0EA5E9', 0.1), 
-                                color: '#0EA5E9',
-                                mr: 2,
-                                transition: 'all 0.2s ease-in-out',
-                                '&:hover': {
-                                  transform: 'scale(1.1)',
-                                }
-                              }}
-                            >
-                              <GroupsIcon />
-                            </Avatar>
-                            <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
-                              {team.name}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <BusinessIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
-                            <Typography sx={{ color: 'text.primary' }}>
-                              {departments?.find((dept) => dept.id === team.department_id)?.name || '—'}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <PersonIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
-                            <Chip
-                              label={`${getTeamMemberCount(team.id)} members`}
-                              size="small"
-                              sx={{
-                                bgcolor: alpha('#0EA5E9', 0.1),
-                                color: '#0EA5E9',
-                                fontWeight: 'medium',
-                                '&:hover': {
-                                  bgcolor: alpha('#0EA5E9', 0.2),
-                                }
-                              }}
-                            />
-                          </Box>
-                        </TableCell>
-                        <TableCell align="right">
-                          <Stack direction="row" spacing={1} justifyContent="flex-end">
-                            {hasAdminPrivileges && (
-                              <IconButton
-                                size="small"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDelete(team.id);
-                                }}
-                                sx={{ 
-                                  color: 'error.main',
-                                  '&:hover': {
-                                    bgcolor: 'error.lighter',
-                                    transform: 'scale(1.1)',
-                                  },
-                                  transition: 'all 0.2s ease-in-out',
-                                }}
-                              >
-                                <DeleteIcon />
-                              </IconButton>
-                            )}
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Avatar 
+                            sx={{ 
+                              bgcolor: alpha('#0EA5E9', 0.1), 
+                              color: '#0EA5E9',
+                              mr: 2,
+                              transition: 'all 0.2s ease-in-out',
+                              '&:hover': {
+                                transform: 'scale(1.1)',
+                              }
+                            }}
+                          >
+                            <GroupsIcon />
+                          </Avatar>
+                          <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
+                            {team.name}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <BusinessIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                          <Typography sx={{ color: 'text.primary' }}>
+                            {departments?.find((dept) => dept.id === team.department_id)?.name || '—'}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <PersonIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                          <Chip
+                            label={`${getTeamMemberCount(team.id)} members`}
+                            size="small"
+                            sx={{
+                              bgcolor: alpha('#0EA5E9', 0.1),
+                              color: '#0EA5E9',
+                              fontWeight: 'medium',
+                              '&:hover': {
+                                bgcolor: alpha('#0EA5E9', 0.2),
+                              }
+                            }}
+                          />
+                        </Box>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Stack direction="row" spacing={1} justifyContent="flex-end">
+                          {hasAdminPrivileges && (
                             <IconButton
                               size="small"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                navigate(`/teams/${team.id}`);
+                                handleDelete(team.id);
                               }}
                               sx={{ 
-                                color: 'primary.main',
+                                color: 'error.main',
                                 '&:hover': {
-                                  bgcolor: 'primary.lighter',
+                                  bgcolor: 'error.lighter',
                                   transform: 'scale(1.1)',
                                 },
                                 transition: 'all 0.2s ease-in-out',
                               }}
                             >
-                              <ArrowForwardIcon />
+                              <DeleteIcon />
                             </IconButton>
-                          </Stack>
-                        </TableCell>
-                      </TableRow>
-                    </Grow>
+                          )}
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/teams/${team.id}`);
+                            }}
+                            sx={{ 
+                              color: 'primary.main',
+                              '&:hover': {
+                                bgcolor: 'primary.lighter',
+                                transform: 'scale(1.1)',
+                              },
+                              transition: 'all 0.2s ease-in-out',
+                            }}
+                          >
+                            <ArrowForwardIcon />
+                          </IconButton>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
                   ))}
                 </TableBody>
               </Table>
