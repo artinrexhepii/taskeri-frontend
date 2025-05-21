@@ -20,6 +20,7 @@ interface NavItem {
   path: string;
   icon: React.ComponentType<{ className?: string }>;
   hideForBasicUser?: boolean;
+  hideForManager?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -29,11 +30,11 @@ const navItems: NavItem[] = [
   { name: 'Teams', path: getPath('teams'), icon: UsersIcon },
   { name: 'Attendance', path: getPath('timeTracking'), icon: ClockIcon },
   { name: 'Leave Requests', path: getPath('leaveRequests'), icon: HomeIcon },
-  // Items that should be hidden for role_id 3
-  { name: 'Reports', path: getPath('reports'), icon: ChartBarIcon, hideForBasicUser: true },
-  { name: 'Company Users', path: '/company/users', icon: BuildingOfficeIcon, hideForBasicUser: true },
-  { name: 'Settings', path: getPath('settings'), icon: CogIcon, hideForBasicUser: true },
-  { name: 'Invoices', path: getPath('invoices'), icon: BanknotesIcon, hideForBasicUser: true },
+  // Items that should be hidden for role_id 2 (manager) and 3 (basic user)
+  { name: 'Reports', path: getPath('reports'), icon: ChartBarIcon, hideForBasicUser: true, hideForManager: true },
+  { name: 'Company Users', path: '/company/users', icon: BuildingOfficeIcon, hideForBasicUser: true, hideForManager: true },
+  { name: 'Settings', path: getPath('settings'), icon: CogIcon, hideForBasicUser: true, hideForManager: true },
+  { name: 'Invoices', path: getPath('invoices'), icon: BanknotesIcon, hideForBasicUser: true, hideForManager: true },
   { name: 'Company', path: getPath('companies'), icon: BuildingOfficeIcon, hideForBasicUser: true }
 ];
 
@@ -54,10 +55,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   // Filter nav items based on user role
   const filteredNavItems = navItems.filter(item => {
-    if (user?.role_id === 3) {
+    if (user?.role_id === 3) { // Basic user
       return !item.hideForBasicUser;
     }
-    return true;
+    if (user?.role_id === 2) { // Manager
+      return !item.hideForManager;
+    }
+    return true; // Admin (role_id 1) sees everything
   });
 
   return (
