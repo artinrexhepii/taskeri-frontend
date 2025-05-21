@@ -27,3 +27,36 @@ export const markNotificationAsRead = async (id: number): Promise<NotificationRe
 export const markAllNotificationsAsRead = async (): Promise<{ message: string }> => {
   return apiClient.put(`${API_ENDPOINTS.NOTIFICATIONS.BASE}/mark-all-read`);
 };
+
+export const getNotificationsForUser = async (
+  userId: number,
+  unreadOnly = false
+): Promise<NotificationResponse[]> => {
+  return apiClient.get(`${API_ENDPOINTS.NOTIFICATIONS.BASE}/user/${userId}`, {
+    params: {
+      unread_only: unreadOnly,
+    },
+  });
+};
+
+export const getNotificationById = async (
+  notificationId: number
+): Promise<NotificationResponse> => {
+  return apiClient.get(`${API_ENDPOINTS.NOTIFICATIONS.BASE}/${notificationId}`);
+};
+
+export const deleteNotification = async (
+  notificationId: number
+): Promise<{ message: string }> => {
+  return apiClient.delete(`${API_ENDPOINTS.NOTIFICATIONS.BASE}/${notificationId}`);
+};
+
+export const getMyNotifications = async (
+  unreadOnly = false
+): Promise<NotificationResponse[]> => {
+  return apiClient.get(`${API_ENDPOINTS.NOTIFICATIONS.BASE}/get/me`, {
+    params: {
+      unread_only: unreadOnly,
+    },
+  });
+};

@@ -21,9 +21,8 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { user, logout } = useAuth();
-  const { data: notifications } = useNotifications();
-  const unreadCount =
-    notifications?.items?.filter((n) => !n.is_read).length || 0;
+  const { data: notifications } = useNotifications(false);
+  const unreadCount = notifications?.filter((n) => !n.is_read).length || 0;
 
   // Format the user's full name using the formatter utility
   const fullName = user ? formatUserName(user.first_name, user.last_name) : "";
@@ -59,7 +58,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           <div className="relative">
             <RightDrawer
               unreadCount={unreadCount}
-              notifications={notifications?.items?.map((n) => n.message) || []}
+              notifications={notifications?.map((n) => n.message) || []}
             />
           </div>
 
