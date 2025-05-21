@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Card,
@@ -7,9 +7,12 @@ import {
   Tab,
   Tabs,
   Typography,
+  TextField,
+  MenuItem,
 } from '@mui/material';
 import { useProjectStatistics } from '../../api/hooks/projects/useProjectStatistics';
 import { useTeamStatistics } from '../../api/hooks/teams/useTeamStatistics';
+import useTenantUsers from '../../api/hooks/tenants/useTenantUsers';
 
 
 interface TabPanelProps {
@@ -39,12 +42,22 @@ export default function Reports() {
   const { data: projectStats, isLoading: isLoadingProjectStats } = useProjectStatistics();
   const { data: teamStats, isLoading: isLoadingTeamStats } = useTeamStatistics();
 
+  const [selectedTeamId, setSelectedTeamId] = useState<number | ''>('');
+
+  const tenantId = 1; // Replace with actual tenant ID logic
+  const {
+    data: tenantUsers,
+    isLoading: isLoadingTenantUsers,
+  } = useTenantUsers(tenantId, { page: 1, pageSize: 100 });
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
-  if (isLoadingProjectStats || isLoadingTeamStats) {
+  const teamMembers =
+    tenantUsers?.items.filter((u) => u.team_id === selectedTeamId) || [];
+
+  if (isLoadingProjectStats || isLoadingTeamStats || isLoadingTenantUsers) {
     return <Typography>Loading...</Typography>;
   }
 
@@ -57,7 +70,6 @@ export default function Reports() {
           <Tabs value={tabValue} onChange={handleTabChange}>
             <Tab label="Project Statistics" />
             <Tab label="Team Statistics" />
-            
           </Tabs>
         </Box>
 
@@ -95,26 +107,49 @@ export default function Reports() {
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
-          <Grid container spacing={3}>
-            {teamStats && (
-              <>
-                <Grid sx={{ width: { xs: '100%', md: '50%' } }}>
-                  <Card sx={{ p: 2 }}>
-                    <Typography variant="subtitle2">Team Performance</Typography>
-                    {Object.entries(teamStats.stats).map(([teamId, count]) => (
-                      <Typography key={teamId} variant="body2">
-                        Team {teamId}: {count} active tasks
-                      </Typography>
-                    ))}
-                  </Card>
-                </Grid>
-              </>
-            )}
-          </Grid>
-        </TabPanel>
+          <Stack spacing={3}>
+            <Card sx={{ p: 2 }}>
+              <Typography variant="subtitle2">Team Performance</Typography>
+              {teamStats &&
+                Object.entries(teamStats.stats).map(([teamId, count]) => (
+                  <Typography key={teamId} variant="body2">
+                    Team {teamId}: {count} active tasks
+                  </Typography>
+                ))}
+            </Card>
 
-       
+            <TextField
+              select
+              fullWidth
+              label="Select Team"
+              value={selectedTeamId}
+              onChange={(e) => setSelectedTeamId(Number(e.target.value))}
+            >
+              {teamStats &&
+                Object.keys(teamStats.stats).map((teamId) => (
+                  <MenuItem key={teamId} value={Number(teamId)}>
+                    Team {teamId}
+                  </MenuItem>
+                ))}
+            </TextField>
+
+            {selectedTeamId && (
+              <Card sx={{ p: 2 }}>
+                <Typography variant="subtitle2">Team Members</Typography>
+                {teamMembers.length > 0 ? (
+                  teamMembers.map((member) => (
+                    <Typography key={member.id}>
+                      {member.user?.first_name} {member.user?.last_name}
+                    </Typography>
+                  ))
+                ) : (
+                  <Typography>No members found for this team.</Typography>
+                )}
+              </Card>
+            )}
+          </Stack>
+        </TabPanel>
       </Card>
     </Stack>
   );
-} 
+}
