@@ -19,21 +19,22 @@ interface NavItem {
   name: string;
   path: string;
   icon: React.ComponentType<{ className?: string }>;
-  requiresPermission?: string[];
+  hideForBasicUser?: boolean;
 }
 
 const navItems: NavItem[] = [
   { name: 'Dashboard', path: getPath('dashboard'), icon: HomeIcon },
   { name: 'Projects', path: getPath('projects'), icon: FolderIcon },
-  { name: 'Tasks', path: getPath('tasks'), icon: Square2StackIcon },
+  { name: 'Board', path: getPath('tasks'), icon: Square2StackIcon },
   { name: 'Teams', path: getPath('teams'), icon: UsersIcon },
-  { name: 'Time Tracking', path: getPath('timeTracking'), icon: ClockIcon },
-  { name: 'Reports', path: getPath('reports'), icon: ChartBarIcon },
-  { name: 'Company Users', path: '/company/users', icon: BuildingOfficeIcon },
-  { name: 'Settings', path: getPath('settings'), icon: CogIcon },
+  { name: 'Attendance', path: getPath('timeTracking'), icon: ClockIcon },
   { name: 'Leave Requests', path: getPath('leaveRequests'), icon: HomeIcon },
-  { name: 'Invoices', path: getPath('invoices'), icon: BanknotesIcon },
-  { name: 'Company', path: getPath('companies'), icon: BuildingOfficeIcon}
+  // Items that should be hidden for role_id 3
+  { name: 'Reports', path: getPath('reports'), icon: ChartBarIcon, hideForBasicUser: true },
+  { name: 'Company Users', path: '/company/users', icon: BuildingOfficeIcon, hideForBasicUser: true },
+  { name: 'Settings', path: getPath('settings'), icon: CogIcon, hideForBasicUser: true },
+  { name: 'Invoices', path: getPath('invoices'), icon: BanknotesIcon, hideForBasicUser: true },
+  { name: 'Company', path: getPath('companies'), icon: BuildingOfficeIcon, hideForBasicUser: true }
 ];
 
 interface SidebarProps {
@@ -46,18 +47,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
   const { getRoleName } = useRoleContext();
 
-  // Debug log to show user roles when component mounts
-  useEffect(() => {
-    if (user) {
-      console.log('Current user:', user);
-      console.log('User role_id:', user?.role_id);
-    }
-  }, [user]);
-
   const isActive = (path: string) => {
     return location.pathname === path ||
       (path !== '/' && location.pathname.startsWith(path));
   };
+
+  // Filter nav items based on user role
+  const filteredNavItems = navItems.filter(item => {
+    if (user?.role_id === 3) {
+      return !item.hideForBasicUser;
+    }
+    return true;
+  });
 
   return (
     <>
@@ -86,9 +87,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           />
         </div>
 
-        {/* Navigation - Now showing all items without filtering */}
+        {/* Navigation */}
         <nav className="mt-4 px-2">
-          {navItems.map((item) => (
+          {filteredNavItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
