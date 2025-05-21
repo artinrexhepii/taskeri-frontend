@@ -1,55 +1,60 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { Fragment } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
+  Avatar,
   Box,
   Card,
-  Grid,
   Stack,
-  Tab,
-  Tabs,
   Typography,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Button,
+  IconButton,
+  Divider,
+  Tooltip,
+  Grid,
 } from '@mui/material';
 import { useTeam } from '../../api/hooks/teams/useTeam';
-import { useTeamStatistics } from '../../api/hooks/teams/useTeamStatistics';
-import { useUserProjects } from '../../api/hooks/user-projects/useUserProjects';
-import { useTasksByUser } from '../../api/hooks/tasks/useTasksByUser';
-import { format } from 'date-fns';
+import { useUsers } from '../../api/hooks/users/useUsers';
+import { useDepartments } from '../../api/hooks/departments/useDepartments';
+import { UserBasicInfo } from '../../types/user.types';
+import { useAuth } from '../../context/AuthContext';
+import {
+  ArrowBack as ArrowBackIcon,
+  Email as EmailIcon,
+  Business as BusinessIcon,
+  Add as AddIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`team-tabpanel-${index}`}
-      aria-labelledby={`team-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
 
 export default function TeamDetail() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const teamId = parseInt(id || '0', 10);
-  const [tabValue, setTabValue] = useState(0);
 
   const { data: team, isLoading: isLoadingTeam } = useTeam(teamId);
-  const { data: statistics, isLoading: isLoadingStats } = useTeamStatistics();
+  const { data: users = [], isLoading: isLoadingUsers } = useUsers();
+  const { data: departments } = useDepartments();
 
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
+  // Filter users that belong to this team
+  const teamMembers = users.filter(user => user.team_id === teamId);
+  const department = departments?.find(dept => dept.id === team?.department_id);
+
+  // Check if user has admin privileges (role_id 1 or 2)
+  const hasAdminPrivileges = user?.role_id === 1 || user?.role_id === 2;
+
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this team?')) {
+      // Add your delete logic here
+      navigate('/teams');
+    }
   };
 
-  if (isLoadingTeam || isLoadingStats) {
+  if (isLoadingTeam || isLoadingUsers) {
     return <Typography>Loading...</Typography>;
   }
 
@@ -59,48 +64,109 @@ export default function TeamDetail() {
 
   return (
     <Stack spacing={3}>
-      <Card sx={{ p: 3 }}>
-        <Grid container spacing={3}>
-          <Grid sx={{ width: { xs: '100%', md: '66.67%' } }}>
-            <Typography variant="h4">{team.name}</Typography>
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              Department ID: {team.department_id}
-            </Typography>
-          </Grid>
-          <Grid sx={{ width: { xs: '100%', md: '33.33%' } }}>
-            {statistics && (
-              <Stack spacing={1}>
-                <Typography variant="subtitle2">Team Statistics</Typography>
-                <Typography variant="body2">
-                  Active Projects: {statistics.stats[teamId] || 0}
-                </Typography>
-              </Stack>
-            )}
-          </Grid>
-        </Grid>
-      </Card>
-
-      <Card>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={tabValue} onChange={handleTabChange}>
-            <Tab label="Members" />
-            <Tab label="Projects" />
-            <Tab label="Tasks" />
-          </Tabs>
+      {/* Header */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box>
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate('/teams')}
+            sx={{ mb: 2 }}
+          >
+            Back to Teams
+          </Button>
+          <Typography variant="h4" sx={{ mb: 1 }}>{team.name}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <BusinessIcon fontSize="small" />
+            {department?.name || 'No Department'}
+          </Typography>
         </Box>
+        
+        {hasAdminPrivileges && (
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon />}
+              onClick={() => navigate('/users/new')}
+            >
+              Add Member
+            </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={handleDelete}
+            >
+              Delete Team
+            </Button>
+          </Box>
+        )}
+      </Box>
 
-        <TabPanel value={tabValue} index={0}>
-          <Typography>Team members will be displayed here</Typography>
-        </TabPanel>
+      {/* Team Stats */}
+      <Grid container spacing={3}>
+        <Grid sx={{ width: { xs: '100%', md: '33.33%' } }}>
+          <Card sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>Team Overview</Typography>
+            <Stack spacing={2}>
+              <Box>
+                <Typography color="text.secondary" variant="body2">Total Members</Typography>
+                <Typography variant="h4">{teamMembers.length}</Typography>
+              </Box>
+              <Box>
+                <Typography color="text.secondary" variant="body2">Department</Typography>
+                <Typography>{department?.name || 'No Department'}</Typography>
+              </Box>
+            </Stack>
+          </Card>
+        </Grid>
 
-        <TabPanel value={tabValue} index={1}>
-          <Typography>Team projects will be displayed here</Typography>
-        </TabPanel>
-
-        <TabPanel value={tabValue} index={2}>
-          <Typography>Team tasks will be displayed here</Typography>
-        </TabPanel>
-      </Card>
+        <Grid sx={{ width: { xs: '100%', md: '33.33%' } }}>
+          <Card>
+            <Box sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ mb: 2 }}>Team Members</Typography>
+              {teamMembers.length > 0 ? (
+                <List>
+                  {teamMembers.map((member: UserBasicInfo) => (
+                    <Fragment key={member.id}>
+                      <ListItem
+                        secondaryAction={
+                          <Tooltip title="Send email">
+                            <IconButton edge="end" onClick={() => window.location.href = `mailto:${member.email}`}>
+                              <EmailIcon />
+                            </IconButton>
+                          </Tooltip>
+                        }
+                      >
+                        <ListItemAvatar>
+                          <Avatar sx={{ bgcolor: 'primary.main' }}>
+                            {member.first_name?.[0]}{member.last_name?.[0]}
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={`${member.first_name} ${member.last_name}`}
+                          secondary={member.email}
+                          primaryTypographyProps={{ fontWeight: 'medium' }}
+                        />
+                      </ListItem>
+                      <Divider component="li" />
+                    </Fragment>
+                  ))}
+                </List>
+              ) : (
+                <Box sx={{ py: 8, textAlign: 'center' }}>
+                  <Typography color="text.secondary" sx={{ mb: 1 }}>No members in this team</Typography>
+                  {hasAdminPrivileges && (
+                    <Button variant="outlined" onClick={() => navigate('/users/new')}>
+                      Add Team Member
+                    </Button>
+                  )}
+                </Box>
+              )}
+            </Box>
+          </Card>
+        </Grid>
+      </Grid>
     </Stack>
   );
-} 
+}

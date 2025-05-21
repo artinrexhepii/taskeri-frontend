@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Avatar,
   Box,
   Button,
   Card,
@@ -21,24 +22,30 @@ import {
   TableRow,
   TextField,
   Typography,
+  Chip,
 } from '@mui/material';
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
-  Edit as EditIcon,
   Search as SearchIcon,
+  Groups as GroupsIcon,
+  ArrowForward as ArrowForwardIcon,
 } from '@mui/icons-material';
 import { useTeams } from '../../api/hooks/teams/useTeams';
 import { useDeleteTeam } from '../../api/hooks/teams/useDeleteTeam';
 import { useCreateTeam } from '../../api/hooks/teams/useCreateTeam';
 import { useDepartments } from '../../api/hooks/departments/useDepartments';
+import { useUsers } from '../../api/hooks/users/useUsers';
+import { useAuth } from '../../context/AuthContext';
 
 export default function TeamList() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { data: teams, isLoading } = useTeams();
   const { mutate: deleteTeam } = useDeleteTeam();
   const createTeamMutation = useCreateTeam();
   const { data: departments } = useDepartments();
+  const { data: users = [] } = useUsers();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -48,6 +55,10 @@ export default function TeamList() {
   const filteredTeams = teams?.filter((team) =>
     team.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const getTeamMemberCount = (teamId: number) => {
+    return users.filter(user => user.team_id === teamId).length;
+  };
 
   const handleDelete = (teamId: number) => {
     if (window.confirm('Are you sure you want to delete this team?')) {
@@ -76,25 +87,45 @@ export default function TeamList() {
     );
   };
 
+  const handleTeamClick = (teamId: number) => {
+    navigate(`/teams/${teamId}`);
+  };
+
+  const hasAdminPrivileges = user?.role_id !== 3;
+
   if (isLoading) return <Typography>Loading...</Typography>;
 
   return (
     <>
       <Stack spacing={3}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h4">Teams</Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setModalOpen(true)}
-          >
-            Add Team
-          </Button>
+        {/* Header */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          mb: 3
+        }}>
+          <Box>
+            <Typography variant="h4" sx={{ mb: 1 }}>Teams</Typography>
+            <Typography variant="body2" color="text.secondary">
+              Manage your organization's teams and their members
+            </Typography>
+          </Box>
+          {hasAdminPrivileges && (
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setModalOpen(true)}
+              sx={{ px: 3 }}
+            >
+              Add Team
+            </Button>
+          )}
         </Box>
 
-        {/* Search Field */}
+        {/* Search and Teams Grid */}
         <Card>
-          <Box sx={{ p: 2 }}>
+          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
             <TextField
               fullWidth
               placeholder="Search teams..."
@@ -110,32 +141,65 @@ export default function TeamList() {
             />
           </Box>
 
-          {/* Teams Table */}
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Name</TableCell>
+                  <TableCell>Team</TableCell>
                   <TableCell>Department</TableCell>
-                  <TableCell>Actions</TableCell>
+                  <TableCell>Members</TableCell>
+                  <TableCell align="right">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {filteredTeams?.map((team) => (
-                  <TableRow key={team.id}>
-                    <TableCell>{team.name}</TableCell>
+                  <TableRow 
+                    key={team.id}
+                    hover
+                    onClick={() => handleTeamClick(team.id)}
+                    sx={{ cursor: 'pointer' }}
+                  >
                     <TableCell>
-                      {
-                        departments?.find((dept) => dept.id === team.department_id)?.name || '—'
-                      }
-                    </TableCell>                    
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Avatar sx={{ bgcolor: 'primary.light', mr: 2 }}>
+                          <GroupsIcon />
+                        </Avatar>
+                        <Typography variant="subtitle2">{team.name}</Typography>
+                      </Box>
+                    </TableCell>
                     <TableCell>
-                      <Stack direction="row" spacing={1}>
-                        <IconButton size="small" onClick={() => navigate(`/teams/${team.id}`)}>
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton size="small" onClick={() => handleDelete(team.id)}>
-                          <DeleteIcon />
+                      {departments?.find((dept) => dept.id === team.department_id)?.name || '—'}
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={`${getTeamMemberCount(team.id)} members`}
+                        size="small"
+                        variant="outlined"
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      <Stack direction="row" spacing={1} justifyContent="flex-end">
+                        {hasAdminPrivileges && (
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(team.id);
+                            }}
+                            color="error"
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        )}
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/teams/${team.id}`);
+                          }}
+                          color="primary"
+                        >
+                          <ArrowForwardIcon />
                         </IconButton>
                       </Stack>
                     </TableCell>
@@ -163,6 +227,7 @@ export default function TeamList() {
               displayEmpty
               value={selectedDepartmentId}
               onChange={(e) => setSelectedDepartmentId(e.target.value)}
+              label="Department"
             >
               <MenuItem value="" disabled>
                 Select Department
@@ -182,7 +247,7 @@ export default function TeamList() {
             onClick={handleCreateTeam}
             disabled={createTeamMutation.status === 'pending'}
           >
-            {createTeamMutation.status === 'pending' ? 'Creating...' : 'Create'}
+            {createTeamMutation.status === 'pending' ? 'Creating...' : 'Create Team'}
           </Button>
         </DialogActions>
       </Dialog>
