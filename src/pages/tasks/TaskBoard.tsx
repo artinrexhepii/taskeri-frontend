@@ -12,6 +12,10 @@ import {
   Badge,
   Avatar,
   Tooltip,
+  FormControl,
+  InputLabel,
+  Select,
+  TextField,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -23,6 +27,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../../api/hooks/tasks/useTasks';
 import { useUsers } from '../../api/hooks/users/useUsers';
+import { useProjects } from '../../api/hooks/projects/useProjects';
 import { TaskPriority, TaskStatus } from '../../types/task.types';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { useUpdateTask } from '../../api/hooks/tasks/useUpdateTask';
@@ -74,17 +79,46 @@ const COLUMN_IDS = {
 
 export default function TaskBoard() {
   const navigate = useNavigate();
-  const { data: tasksData } = useTasks();
+  const { data: tasksData, isLoading: tasksLoading } = useTasks({
+    page: 1,
+    pageSize: 100,
+    enabled: true
+  });
   const { data: usersData } = useUsers();
+  const { data: projectsData } = useProjects();
   const { mutate: updateTask } = useUpdateTask();
   const tasks = tasksData?.items || [];
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [selectedProject, setSelectedProject] = useState<number | 'all'>('all');
+  const [selectedUser, setSelectedUser] = useState<number | 'all'>('all');
 
   const getAssignedUsers = (task: Task): UserBasicInfo[] => {
-    if (!task.assigned_users_details) return [];
-    return task.assigned_users_details;
+    // If we have assigned_users_details from the API, use that
+    if (task.assigned_users_details && task.assigned_users_details.length > 0) {
+      return task.assigned_users_details;
+    }
+    
+    // Fallback: If we only have assigned_users IDs, map them to full user objects
+    if (task.assigned_users && usersData) {
+      return usersData.filter(user => task.assigned_users?.includes(user.id));
+    }
+    
+    return [];
   };
+
+  // Log task data for debugging
+  console.log('Tasks data:', tasksData?.items);
+  console.log('Users data:', usersData);
+  console.log('Projects data:', projectsData);
+
+  const filteredTasks = (tasksData?.items || []).filter((task) => {
+    console.log('Filtering task:', task.name);
+    const matchesProject = selectedProject === 'all' || task.project_id === selectedProject;
+    const matchesUser = selectedUser === 'all' || task.assigned_users?.includes(selectedUser);
+    console.log('Matches project:', matchesProject, 'Matches user:', matchesUser);
+    return matchesProject && matchesUser;
+  });
 
   // Status mapping
   const statusMap = {
@@ -97,22 +131,22 @@ export default function TaskBoard() {
   const columns = {
     [COLUMN_IDS.TODO]: {
       title: 'To Do',
-      items: tasks.filter((task) => task.status === TaskStatus.TODO),
+      items: filteredTasks.filter((task) => task.status === TaskStatus.TODO),
       color: 'gray',
     },
     [COLUMN_IDS.IN_PROGRESS]: {
       title: 'In Progress',
-      items: tasks.filter((task) => task.status === TaskStatus.IN_PROGRESS),
+      items: filteredTasks.filter((task) => task.status === TaskStatus.IN_PROGRESS),
       color: 'blue',
     },
     [COLUMN_IDS.TECHNICAL_REVIEW]: {
       title: 'Technical Review',
-      items: tasks.filter((task) => task.status === TaskStatus.TECHNICAL_REVIEW),
+      items: filteredTasks.filter((task) => task.status === TaskStatus.TECHNICAL_REVIEW),
       color: 'yellow',
     },
     [COLUMN_IDS.DONE]: {
       title: 'Done',
-      items: tasks.filter((task) => task.status === TaskStatus.DONE),
+      items: filteredTasks.filter((task) => task.status === TaskStatus.DONE),
       color: 'green',
     },
   };
@@ -188,6 +222,41 @@ export default function TaskBoard() {
           </div>
         </div>
 
+        {/* Filters */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormControl fullWidth>
+            <InputLabel>Filter by Project</InputLabel>
+            <Select
+              value={selectedProject}
+              label="Filter by Project"
+              onChange={(e) => setSelectedProject(e.target.value as number | 'all')}
+            >
+              <MenuItem value="all">All Projects</MenuItem>
+              {projectsData?.map((project) => (
+                <MenuItem key={project.id} value={project.id}>
+                  {project.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth>
+            <InputLabel>Filter by Assigned User</InputLabel>
+            <Select
+              value={selectedUser}
+              label="Filter by Assigned User"
+              onChange={(e) => setSelectedUser(e.target.value as number | 'all')}
+            >
+              <MenuItem value="all">All Users</MenuItem>
+              {usersData?.map((user) => (
+                <MenuItem key={user.id} value={user.id}>
+                  {user.first_name} {user.last_name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </div>
+
         {/* Kanban Board */}
         <DragDropContext onDragEnd={onDragEnd}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -238,6 +307,7 @@ export default function TaskBoard() {
                                 onClick={() => navigate(`/tasks/${task.id}`)}
                               >
                                 <div className="flex flex-col gap-2">
+                                  {/* Task header */}
                                   <div className="flex items-start justify-between">
                                     <h3 className="text-sm font-medium text-gray-900">
                                       {task.name}
@@ -257,6 +327,7 @@ export default function TaskBoard() {
                                     </p>
                                   )}
 
+                                  {/* Task metadata */}
                                   <div className="flex items-center justify-between mt-2">
                                     <div className="flex items-center gap-2">
                                       <span className={`text-xs font-medium ${getPriorityColor(task.priority)}`}>
@@ -270,21 +341,34 @@ export default function TaskBoard() {
                                     )}
                                   </div>
 
-                                  {/* Assigned Users */}
+                                  {/* Assigned Users Section */}
                                   <div className="flex flex-col mt-2 gap-2">
-                                    <div className="flex items-center -space-x-2">
-                                      {getAssignedUsers(task).map((user) => (
-                                        <Tooltip key={user.id} title={`${user.first_name} ${user.last_name}`}>
-                                          <Avatar
-                                            className="h-6 w-6 border-2 border-white"
-                                            sx={{ width: 24, height: 24, fontSize: '0.75rem' }}
-                                          >
-                                            {user.first_name[0]}
-                                          </Avatar>
-                                        </Tooltip>
-                                      ))}
+                                    <div className="flex items-center gap-2">
+                                      {/* Avatars */}
+                                      <div className="flex -space-x-2">
+                                        {getAssignedUsers(task).map((user) => (
+                                          <Tooltip key={user.id} title={`${user.first_name} ${user.last_name}`}>
+                                            <Avatar
+                                              className="h-6 w-6 border-2 border-white"
+                                              sx={{ width: 24, height: 24, fontSize: '0.75rem' }}
+                                            >
+                                              {user.first_name[0]}
+                                            </Avatar>
+                                          </Tooltip>
+                                        ))}
+                                      </div>
+                                      
+                                      {/* Names list */}
+                                      <div className="flex-1 text-xs text-gray-600 truncate">
+                                        {getAssignedUsers(task)
+                                          .map(user => `${user.first_name} ${user.last_name}`)
+                                          .join(', ')}
+                                      </div>
                                     </div>
                                     
+                                    {getAssignedUsers(task).length === 0 && (
+                                      <p className="text-xs text-gray-500 italic">No assignees</p>
+                                    )}
                                   </div>
                                 </div>
                               </Card>
