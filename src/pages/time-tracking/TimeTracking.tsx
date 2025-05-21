@@ -9,6 +9,12 @@ import {
   Tabs,
   TextField,
   Typography,
+  Avatar,
+  Chip,
+  IconButton,
+  Tooltip,
+  Paper,
+  Divider,
 } from '@mui/material';
 import { format, differenceInSeconds } from 'date-fns';
 import { useAuth } from '../../context/AuthContext';
@@ -17,6 +23,15 @@ import { useCheckOut } from '../../api/hooks/attendance/useCheckOut';
 import { useMyAttendance } from '../../api/hooks/attendance/useMyAttendance';
 import { useUserAttendance } from '../../api/hooks/attendance/useUserAttendance';
 import { useUsers } from '../../api/hooks/users/useUsers';
+import { motion } from 'framer-motion';
+import {
+  AccessTime as AccessTimeIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  Person as PersonIcon,
+  CalendarToday as CalendarIcon,
+  Timer as TimerIcon,
+} from '@mui/icons-material';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -71,82 +86,176 @@ export default function TimeTracking() {
   const renderAttendanceList = (attendanceData?: any[]) => (
     <Stack spacing={2}>
       {attendanceData?.map((entry) => (
-        <Card key={entry.id} sx={{ p: 2 }}>
-          <Stack spacing={1}>
-            <Typography variant="subtitle1">Entry #{entry.id}</Typography>
-            <Typography variant="body2" color="text.secondary">
-              Check In: {format(new Date(entry.check_in), 'yyyy-MM-dd HH:mm')}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Check Out:{' '}
-              {entry.check_out
-                ? format(new Date(entry.check_out), 'yyyy-MM-dd HH:mm')
-                : 'Ongoing'}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Duration: {formatDuration(entry.check_in, entry.check_out)}
-            </Typography>
-          </Stack>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          key={entry.id}
+        >
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 2,
+              '&:hover': {
+                boxShadow: 2,
+                borderColor: 'primary.main',
+              },
+            }}
+          >
+            <Stack spacing={2}>
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Typography variant="h6" color="primary">
+                  Entry #{entry.id}
+                </Typography>
+                <Chip
+                  icon={entry.check_out ? <CheckCircleIcon /> : <AccessTimeIcon />}
+                  label={entry.check_out ? 'Completed' : 'In Progress'}
+                  color={entry.check_out ? 'success' : 'primary'}
+                  size="small"
+                />
+              </Box>
+
+              <Divider />
+
+              <Stack direction="row" spacing={4}>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <CalendarIcon color="action" />
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
+                      Check In
+                    </Typography>
+                    <Typography variant="body2">
+                      {format(new Date(entry.check_in), 'MMM dd, yyyy HH:mm')}
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Box display="flex" alignItems="center" gap={1}>
+                  <CalendarIcon color="action" />
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
+                      Check Out
+                    </Typography>
+                    <Typography variant="body2">
+                      {entry.check_out
+                        ? format(new Date(entry.check_out), 'MMM dd, yyyy HH:mm')
+                        : 'Ongoing'}
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Box display="flex" alignItems="center" gap={1}>
+                  <TimerIcon color="action" />
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
+                      Duration
+                    </Typography>
+                    <Typography variant="body2">
+                      {formatDuration(entry.check_in, entry.check_out)}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Stack>
+            </Stack>
+          </Paper>
+        </motion.div>
       ))}
     </Stack>
   );
 
   return (
     <Stack spacing={3}>
-      <Typography variant="h4">Time Tracking</Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+          Time Tracking
+        </Typography>
+        <Stack direction="row" spacing={2}>
+          <Button
+            variant="contained"
+            startIcon={<CheckCircleIcon />}
+            onClick={() => checkInMutation.mutate()}
+            disabled={checkInMutation.isPending}
+            sx={{ borderRadius: 2 }}
+          >
+            Check In
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<CancelIcon />}
+            onClick={() => checkOutMutation.mutate()}
+            disabled={checkOutMutation.isPending}
+            sx={{ borderRadius: 2 }}
+          >
+            Check Out
+          </Button>
+        </Stack>
+      </Box>
 
-      <Stack direction="row" spacing={2}>
-        <Button
-          variant="contained"
-          onClick={() => checkInMutation.mutate()}
-          disabled={checkInMutation.isPending}
-        >
-          Check In
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={() => checkOutMutation.mutate()}
-          disabled={checkOutMutation.isPending}
-        >
-          Check Out
-        </Button>
-      </Stack>
-
-      <Card>
+      <Card sx={{ borderRadius: 2, overflow: 'hidden' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={tabValue} onChange={handleTabChange}>
-            <Tab label="My Attendance" />
-            {hasAdminPrivileges && <Tab label="User Attendance" />}
+          <Tabs 
+            value={tabValue} 
+            onChange={handleTabChange}
+            sx={{
+              '& .MuiTab-root': {
+                textTransform: 'none',
+                fontWeight: 500,
+                minWidth: 120,
+              },
+            }}
+          >
+            <Tab 
+              icon={<PersonIcon />} 
+              iconPosition="start" 
+              label="My Attendance" 
+            />
+            {hasAdminPrivileges && (
+              <Tab 
+                icon={<PersonIcon />} 
+                iconPosition="start" 
+                label="User Attendance" 
+              />
+            )}
           </Tabs>
         </Box>
 
-        {/* Tab 1: My Attendance */}
         <TabPanel value={tabValue} index={0}>
           {myAttendance.isLoading ? (
-            <Typography>Loading your attendance...</Typography>
+            <Box display="flex" justifyContent="center" p={3}>
+              <Typography>Loading your attendance...</Typography>
+            </Box>
           ) : (
             renderAttendanceList(myAttendance.data)
           )}
         </TabPanel>
 
-        {/* Tab 2: User Attendance with dropdown */}
         {hasAdminPrivileges && (
           <TabPanel value={tabValue} index={1}>
             {usersQuery.isLoading ? (
-              <Typography>Loading users...</Typography>
+              <Box display="flex" justifyContent="center" p={3}>
+                <Typography>Loading users...</Typography>
+              </Box>
             ) : (
-              <>
+              <Stack spacing={3}>
                 <TextField
                   select
                   label="Select User"
                   value={selectedUserId ?? ''}
                   onChange={(e) => setSelectedUserId(parseInt(e.target.value))}
                   sx={{ minWidth: 300 }}
+                  size="small"
                 >
                   {usersQuery.data?.map((user) => (
                     <MenuItem key={user.id} value={user.id}>
-                      {user.email}
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Avatar sx={{ width: 24, height: 24, fontSize: '0.875rem' }}>
+                          {user.first_name?.[0]}{user.last_name?.[0]}
+                        </Avatar>
+                        <Typography>{user.email}</Typography>
+                      </Box>
                     </MenuItem>
                   ))}
                 </TextField>
@@ -154,11 +263,15 @@ export default function TimeTracking() {
                 {selectedUserId !== null && (
                   <>
                     {userAttendance.isLoading ? (
-                      <Typography sx={{ mt: 2 }}>Loading attendance...</Typography>
+                      <Box display="flex" justifyContent="center" p={3}>
+                        <Typography>Loading attendance...</Typography>
+                      </Box>
                     ) : (
-                      <Box sx={{ mt: 2 }}>
+                      <Box>
                         {userAttendance.data?.length === 0 ? (
-                          <Typography>No records found.</Typography>
+                          <Paper sx={{ p: 3, textAlign: 'center' }}>
+                            <Typography color="text.secondary">No records found.</Typography>
+                          </Paper>
                         ) : (
                           renderAttendanceList(userAttendance.data)
                         )}
@@ -166,7 +279,7 @@ export default function TimeTracking() {
                     )}
                   </>
                 )}
-              </>
+              </Stack>
             )}
           </TabPanel>
         )}
