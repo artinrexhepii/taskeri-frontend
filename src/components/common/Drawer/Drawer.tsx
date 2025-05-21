@@ -11,10 +11,10 @@ import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
 import CircleIcon from "@mui/icons-material/Circle";
 import { BellIcon } from "@heroicons/react/24/outline";
-
+import {useMarkNotificationAsRead} from "../../../api/hooks/notifications/useMarkNotificationAsRead";
 interface RightDrawerProps {
   unreadCount: number;
-  notifications: string[];
+  notifications: { id: number; message: string; is_read: boolean }[];
 }
 
 export default function RightDrawer({
@@ -22,6 +22,10 @@ export default function RightDrawer({
   notifications,
 }: RightDrawerProps) {
   const [open, setOpen] = React.useState(false);
+  const { mutate } = useMarkNotificationAsRead();
+  const [readStatus, setReadStatus] = React.useState(
+    notifications.map(() => false)
+  );
 
   const toggleDrawer =
     (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
@@ -35,6 +39,10 @@ export default function RightDrawer({
       setOpen(open);
     };
 
+  const markAsRead = (id: number) => () => {
+    mutate(id);
+  };
+
   const list = () => (
     <Box
       sx={{ width: 250 }}
@@ -43,18 +51,30 @@ export default function RightDrawer({
       onKeyDown={toggleDrawer(false)}
     >
       <List>
-        {notifications.length === 0 ? (
+        {notifications.filter((notification) => !notification.is_read).length === 0 ? (
           <ListItem>
-            <ListItemText primary="No notifications" />
+            <ListItemText primary="No unread notifications" />
           </ListItem>
         ) : (
-          notifications.map((text, index) => (
-            <ListItem key={index} disablePadding>
-              <ListItemButton>
+          notifications.map((notification) => (
+            <ListItem key={notification.id} disablePadding>
+              <ListItemButton sx={{ flexDirection: 'column', alignItems: 'flex-start', padding: '16px' }}>
                 <ListItemIcon>
                   <CircleIcon />
                 </ListItemIcon>
-                <ListItemText primary={text} />
+                <ListItemText primary={notification.message} sx={{ marginBottom: '8px' }} />
+                {!notification.is_read && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      markAsRead(notification.id)();
+                    }}
+                    className="text-blue-500 hover:underline px-4 py-2 rounded-md bg-blue-100 hover:bg-blue-200"
+                    style={{ cursor: 'pointer' }}
+                  >
+                    Mark as Read
+                  </button>
+                )}
               </ListItemButton>
             </ListItem>
           ))
@@ -84,5 +104,5 @@ export default function RightDrawer({
   );
 }
 // Usage example
-// <RightDrawer unreadCount={3} notifications={["Notification 1", "Notification 2"]} />
+// <RightDrawer unreadCount={3} notifications={[{ id: 1, message: "Notification 1", is_read: false }, { id: 2, message: "Notification 2", is_read: true }]} />
 // Note: You can replace the dummy notifications with actual data from your state or props.

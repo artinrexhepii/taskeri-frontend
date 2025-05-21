@@ -52,7 +52,7 @@ export const deleteNotification = async (
 };
 
 export const getMyNotifications = async (
-  unreadOnly = false
+  unreadOnly = true
 ): Promise<NotificationResponse[]> => {
   return apiClient.get(`${API_ENDPOINTS.NOTIFICATIONS.BASE}/get/me`, {
     params: {
