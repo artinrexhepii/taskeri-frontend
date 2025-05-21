@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTasks } from '../../api/hooks/tasks/useTasks';
 import { useProjects } from '../../api/hooks/projects/useProjects';
@@ -14,7 +14,7 @@ import {
   PlusIcon
 } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
-import { TaskBase, TaskStatus } from '../../types/task.types';
+import { TaskBase, TaskResponse, TaskStatus } from '../../types/task.types';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -26,11 +26,22 @@ const Dashboard: React.FC = () => {
   const projects = projectsData || [];
   const companies = companiesData || [];
 
+  // Filter tasks based on user role and assignment
+  const filteredTasks = useMemo(() => {
+    if (user?.role_id === 3) {
+      return tasks.filter((task: TaskResponse) => 
+        task.assigned_users?.includes(user.id)
+      );
+    }
+    return tasks;
+  }, [tasks, user]);
+
+  // Calculate stats based on filtered tasks
   const taskStats = {
-    total: tasks.length || 0,
-    completed: tasks.filter((task: TaskBase) => task.status === TaskStatus.DONE).length || 0,
-    inProgress: tasks.filter((task: TaskBase) => task.status === TaskStatus.IN_PROGRESS).length || 0,
-    overdue: tasks.filter((task: TaskBase) => {
+    total: filteredTasks.length || 0,
+    completed: filteredTasks.filter((task: TaskBase) => task.status === TaskStatus.DONE).length || 0,
+    inProgress: filteredTasks.filter((task: TaskBase) => task.status === TaskStatus.IN_PROGRESS).length || 0,
+    overdue: filteredTasks.filter((task: TaskBase) => {
       if (task.due_date && task.status !== TaskStatus.DONE) {
         return new Date(task.due_date) < new Date();
       }
@@ -68,13 +79,15 @@ const Dashboard: React.FC = () => {
               <PlusIcon className="h-5 w-5 mr-2 text-gray-500" />
               New Task
             </Link>
-            <Link 
-              to="/projects/new" 
-              className="inline-flex items-center px-4 py-2 bg-primary border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-            >
-              <PlusIcon className="h-5 w-5 mr-2" />
-              New Project
-            </Link>
+            {user?.role_id !== 3 && (
+              <Link 
+                to="/projects/new" 
+                className="inline-flex items-center px-4 py-2 bg-primary border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              >
+                <PlusIcon className="h-5 w-5 mr-2" />
+                New Project
+              </Link>
+            )}
           </div>
         </div>
 
@@ -88,7 +101,9 @@ const Dashboard: React.FC = () => {
                   <ChartBarIcon className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Tasks</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    {user?.role_id === 3 ? 'My Tasks' : 'Total Tasks'}
+                  </p>
                   <p className="text-2xl font-bold text-gray-900">{taskStats.total}</p>
                 </div>
               </div>
@@ -153,27 +168,29 @@ const Dashboard: React.FC = () => {
 
           {/* Overview Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="transform transition-all hover:scale-105">
-              <div className="flex items-center justify-between p-6">
-                <div className="flex items-center">
-                  <div className="p-3 rounded-xl bg-indigo-50 mr-4">
-                    <BuildingOfficeIcon className="h-6 w-6 text-indigo-600" />
+            {user?.role_id !== 3 && (
+              <Card className="transform transition-all hover:scale-105">
+                <div className="flex items-center justify-between p-6">
+                  <div className="flex items-center">
+                    <div className="p-3 rounded-xl bg-indigo-50 mr-4">
+                      <BuildingOfficeIcon className="h-6 w-6 text-indigo-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Companies</p>
+                      <p className="text-2xl font-bold text-gray-900">{companies.length}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Companies</p>
-                    <p className="text-2xl font-bold text-gray-900">{companies.length}</p>
-                  </div>
+                  <Link 
+                    to="/companies" 
+                    className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
+                  >
+                    →
+                  </Link>
                 </div>
-                <Link 
-                  to="/companies" 
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
-                >
-                  →
-                </Link>
-              </div>
-            </Card>
+              </Card>
+            )}
 
-            <Card className="transform transition-all hover:scale-105">
+            <Card className={`transform transition-all hover:scale-105 ${user?.role_id === 3 ? 'md:col-span-2' : ''}`}>
               <div className="flex items-center justify-between p-6">
                 <div className="flex items-center">
                   <div className="p-3 rounded-xl bg-purple-50 mr-4">
@@ -197,7 +214,9 @@ const Dashboard: React.FC = () => {
           {/* Recent Tasks */}
           <Card className="overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-900">Recent Tasks</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                {user?.role_id === 3 ? 'My Recent Tasks' : 'Recent Tasks'}
+              </h2>
               <Link 
                 to="/tasks" 
                 className="text-sm text-primary hover:text-primary/80 font-medium"
@@ -206,7 +225,7 @@ const Dashboard: React.FC = () => {
               </Link>
             </div>
             <div className="divide-y divide-gray-100">
-              {tasks.slice(0, 5).map(task => (
+              {filteredTasks.slice(0, 5).map(task => (
                 <Link key={task.id} to={`/tasks/${task.id}`}>
                   <div className="p-6 hover:bg-gray-50 transition-colors">
                     <div className="flex items-center justify-between">
@@ -234,22 +253,27 @@ const Dashboard: React.FC = () => {
                   </div>
                 </Link>
               ))}
-              {tasks.length === 0 && (
+              {filteredTasks.length === 0 && (
                 <div className="text-center py-12">
                   <FolderIcon className="mx-auto h-12 w-12 text-gray-400" />
                   <h3 className="mt-2 text-sm font-medium text-gray-900">No tasks</h3>
                   <p className="mt-1 text-sm text-gray-500">
-                    Get started by creating a new task
+                    {user?.role_id === 3 
+                      ? 'You have no tasks assigned yet'
+                      : 'Get started by creating a new task'
+                    }
                   </p>
-                  <div className="mt-6">
-                    <Link
-                      to="/tasks/new"
-                      className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                    >
-                      <PlusIcon className="h-5 w-5 mr-2" />
-                      New Task
-                    </Link>
-                  </div>
+                  {user?.role_id !== 3 && (
+                    <div className="mt-6">
+                      <Link
+                        to="/tasks/new"
+                        className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                      >
+                        <PlusIcon className="h-5 w-5 mr-2" />
+                        New Task
+                      </Link>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
