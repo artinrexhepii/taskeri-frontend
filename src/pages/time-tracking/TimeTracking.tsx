@@ -51,6 +51,8 @@ export default function TimeTracking() {
   const userAttendance = useUserAttendance(selectedUserId ?? 0, selectedUserId !== null);
   const usersQuery = useUsers();
 
+  const hasAdminPrivileges = user?.role_id !== 3;
+
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
@@ -115,7 +117,7 @@ export default function TimeTracking() {
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={tabValue} onChange={handleTabChange}>
             <Tab label="My Attendance" />
-            <Tab label="User Attendance" />
+            {hasAdminPrivileges && <Tab label="User Attendance" />}
           </Tabs>
         </Box>
 
@@ -129,43 +131,45 @@ export default function TimeTracking() {
         </TabPanel>
 
         {/* Tab 2: User Attendance with dropdown */}
-        <TabPanel value={tabValue} index={1}>
-          {usersQuery.isLoading ? (
-            <Typography>Loading users...</Typography>
-          ) : (
-            <>
-              <TextField
-                select
-                label="Select User"
-                value={selectedUserId ?? ''}
-                onChange={(e) => setSelectedUserId(parseInt(e.target.value))}
-                sx={{ minWidth: 300 }}
-              >
-                {usersQuery.data?.map((user) => (
-                  <MenuItem key={user.id} value={user.id}>
-                    {user.email}
-                  </MenuItem>
-                ))}
-              </TextField>
+        {hasAdminPrivileges && (
+          <TabPanel value={tabValue} index={1}>
+            {usersQuery.isLoading ? (
+              <Typography>Loading users...</Typography>
+            ) : (
+              <>
+                <TextField
+                  select
+                  label="Select User"
+                  value={selectedUserId ?? ''}
+                  onChange={(e) => setSelectedUserId(parseInt(e.target.value))}
+                  sx={{ minWidth: 300 }}
+                >
+                  {usersQuery.data?.map((user) => (
+                    <MenuItem key={user.id} value={user.id}>
+                      {user.email}
+                    </MenuItem>
+                  ))}
+                </TextField>
 
-              {selectedUserId !== null && (
-                <>
-                  {userAttendance.isLoading ? (
-                    <Typography sx={{ mt: 2 }}>Loading attendance...</Typography>
-                  ) : (
-                    <Box sx={{ mt: 2 }}>
-                      {userAttendance.data?.length === 0 ? (
-                        <Typography>No records found.</Typography>
-                      ) : (
-                        renderAttendanceList(userAttendance.data)
-                      )}
-                    </Box>
-                  )}
-                </>
-              )}
-            </>
-          )}
-        </TabPanel>
+                {selectedUserId !== null && (
+                  <>
+                    {userAttendance.isLoading ? (
+                      <Typography sx={{ mt: 2 }}>Loading attendance...</Typography>
+                    ) : (
+                      <Box sx={{ mt: 2 }}>
+                        {userAttendance.data?.length === 0 ? (
+                          <Typography>No records found.</Typography>
+                        ) : (
+                          renderAttendanceList(userAttendance.data)
+                        )}
+                      </Box>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+          </TabPanel>
+        )}
       </Card>
     </Stack>
   );
