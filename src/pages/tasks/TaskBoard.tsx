@@ -13,21 +13,19 @@ import {
   FormControl,
   InputLabel,
   Select,
-  TextField,
 } from '@mui/material';
 import {
   Add as AddIcon,
   ViewList as ViewListIcon,
   CalendarMonth as CalendarIcon,
   MoreVert as MoreVertIcon,
-  ViewKanban as ViewKanbanIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../../api/hooks/tasks/useTasks';
 import { useUsers } from '../../api/hooks/users/useUsers';
 import { useProjects } from '../../api/hooks/projects/useProjects';
 import { TaskPriority, TaskStatus } from '../../types/task.types';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useUpdateTask } from '../../api/hooks/tasks/useUpdateTask';
 import { TaskResponse } from '../../types/task.types';
 import { format } from 'date-fns';
@@ -38,6 +36,14 @@ interface Task extends TaskResponse {
   assigned_users?: number[];
   assigned_users_details?: UserBasicInfo[];
 }
+
+// Display names for the UI
+const TaskStatusDisplayNames: Record<TaskStatus, string> = {
+  [TaskStatus.TODO]: "To Do",
+  [TaskStatus.IN_PROGRESS]: "In Progress",
+  [TaskStatus.TECHNICAL_REVIEW]: "Technical Review",
+  [TaskStatus.DONE]: "Done"
+};
 
 const getStatusColor = (status: TaskStatus) => {
   switch (status) {
@@ -67,13 +73,19 @@ const getPriorityColor = (priority: TaskPriority) => {
   }
 };
 
-// Define normalized status IDs
-const COLUMN_IDS = {
-  TODO: 'To Do',
-  IN_PROGRESS: 'In Progress',
-  TECHNICAL_REVIEW: 'Technical Review',
-  DONE: 'Done'
+// Define droppable IDs that match backend values exactly
+const DROPPABLE_IDS = {
+  TODO: TaskStatus.TODO,
+  IN_PROGRESS: TaskStatus.IN_PROGRESS,
+  TECHNICAL_REVIEW: TaskStatus.TECHNICAL_REVIEW,
+  DONE: TaskStatus.DONE
 } as const;
+
+// Map droppable IDs to TaskStatus values (now they are identical)
+const droppableToTaskStatus = DROPPABLE_IDS;
+
+// Map TaskStatus values to droppable IDs (now they are identical)
+const taskStatusToDroppable = DROPPABLE_IDS;
 
 export default function TaskBoard() {
   const navigate = useNavigate();
@@ -84,7 +96,7 @@ export default function TaskBoard() {
   });
   const { data: usersData } = useUsers();
   const { data: projectsData } = useProjects();
-  const { mutate: updateTask } = useUpdateTask();
+  const updateTask = useUpdateTask();
   const tasks = tasksData?.items || [];
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
@@ -92,58 +104,38 @@ export default function TaskBoard() {
   const [selectedUser, setSelectedUser] = useState<number | 'all'>('all');
 
   const getAssignedUsers = (task: Task): UserBasicInfo[] => {
-    // If we have assigned_users_details from the API, use that
-    if (task.assigned_users_details && task.assigned_users_details.length > 0) {
+    if (task.assigned_users_details?.length) {
       return task.assigned_users_details;
     }
-    
-    // Fallback: If we only have assigned_users IDs, map them to full user objects
-    if (task.assigned_users && usersData) {
-      return usersData.filter(user => task.assigned_users?.includes(user.id));
-    }
-    
-    return [];
+    return task.assigned_users && usersData 
+      ? usersData.filter(user => task.assigned_users?.includes(user.id))
+      : [];
   };
 
-  // Log task data for debugging
-  console.log('Tasks data:', tasksData?.items);
-  console.log('Users data:', usersData);
-  console.log('Projects data:', projectsData);
-
   const filteredTasks = (tasksData?.items || []).filter((task) => {
-    console.log('Filtering task:', task.name);
     const matchesProject = selectedProject === 'all' || task.project_id === selectedProject;
     const matchesUser = selectedUser === 'all' || task.assigned_users?.includes(selectedUser);
-    console.log('Matches project:', matchesProject, 'Matches user:', matchesUser);
     return matchesProject && matchesUser;
   });
 
-  // Status mapping
-  const statusMap = {
-    [COLUMN_IDS.TODO]: TaskStatus.TODO,
-    [COLUMN_IDS.IN_PROGRESS]: TaskStatus.IN_PROGRESS,
-    [COLUMN_IDS.TECHNICAL_REVIEW]: TaskStatus.TECHNICAL_REVIEW,
-    [COLUMN_IDS.DONE]: TaskStatus.DONE,
-  };
-
   const columns = {
-    [COLUMN_IDS.TODO]: {
-      title: 'To Do',
+    [DROPPABLE_IDS.TODO]: {
+      title: TaskStatusDisplayNames[TaskStatus.TODO],
       items: filteredTasks.filter((task) => task.status === TaskStatus.TODO),
       color: 'gray',
     },
-    [COLUMN_IDS.IN_PROGRESS]: {
-      title: 'In Progress',
+    [DROPPABLE_IDS.IN_PROGRESS]: {
+      title: TaskStatusDisplayNames[TaskStatus.IN_PROGRESS],
       items: filteredTasks.filter((task) => task.status === TaskStatus.IN_PROGRESS),
       color: 'blue',
     },
-    [COLUMN_IDS.TECHNICAL_REVIEW]: {
-      title: 'Technical Review',
+    [DROPPABLE_IDS.TECHNICAL_REVIEW]: {
+      title: TaskStatusDisplayNames[TaskStatus.TECHNICAL_REVIEW],
       items: filteredTasks.filter((task) => task.status === TaskStatus.TECHNICAL_REVIEW),
       color: 'yellow',
     },
-    [COLUMN_IDS.DONE]: {
-      title: 'Done',
+    [DROPPABLE_IDS.DONE]: {
+      title: TaskStatusDisplayNames[TaskStatus.DONE],
       items: filteredTasks.filter((task) => task.status === TaskStatus.DONE),
       color: 'green',
     },
@@ -158,16 +150,16 @@ export default function TaskBoard() {
     }
 
     const task = tasks.find((t) => t.id === Number(draggableId));
-    if (task) {
-      const newStatus = statusMap[destination.droppableId as keyof typeof statusMap];
-      updateTask({
-        id: task.id,
-        taskData: {
-          ...task,
-          status: newStatus,
-        },
-      });
-    }
+    if (!task) return;
+
+    const newStatus = droppableToTaskStatus[destination.droppableId as keyof typeof DROPPABLE_IDS];
+    
+    updateTask.mutate({
+      id: task.id,
+      taskData: {
+        status: newStatus,
+      }
+    });
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>, taskId: string) => {
@@ -270,7 +262,7 @@ export default function TaskBoard() {
                   <Button
                     size="small"
                     onClick={() => navigate('/tasks/new', { 
-                      state: { defaultStatus: statusMap[columnId as keyof typeof statusMap] } 
+                      state: { defaultStatus: droppableToTaskStatus[columnId as keyof typeof DROPPABLE_IDS] } 
                     })}
                     className="text-gray-500 hover:text-gray-700"
                   >
