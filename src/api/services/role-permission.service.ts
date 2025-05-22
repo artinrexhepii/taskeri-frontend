@@ -17,3 +17,7 @@ export const addPermissionToRole = async (roleId: number, permissionId: number):
 export const removePermissionFromRole = async (roleId: number, permissionId: number): Promise<void> => {
   await apiClient.delete(API_ENDPOINTS.ROLE_PERMISSIONS.ADD_PERMISSION(roleId, permissionId));
 };
+
+export const getRolePermissionsByRoleId = async (roleId: number): Promise<PermissionResponse[]> => {
+  return apiClient.get(`/role-permissions/permissions-by-role/${roleId}`);
+};
