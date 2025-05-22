@@ -31,7 +31,7 @@ const navItems: NavItem[] = [
   { name: 'Teams', path: getPath('teams'), icon: UsersIcon },
   { name: 'Attendance', path: getPath('timeTracking'), icon: ClockIcon },
   { name: 'Leave Requests', path: getPath('leaveRequests'), icon: HomeIcon },
-  { name: 'Role Permissions', path: getPath('rolePermissions'), icon: KeyIcon},
+  { name: 'Role Permissions', path: getPath('rolePermissions'), icon: KeyIcon, hideForBasicUser: true, hideForManager: true},
   // Items that should be hidden for role_id 2 (manager) and 3 (basic user)
   { name: 'Reports', path: getPath('reports'), icon: ChartBarIcon, hideForBasicUser: true, hideForManager: true },
   { name: 'Company Users', path: '/company/users', icon: BuildingOfficeIcon, hideForBasicUser: true, hideForManager: true },
