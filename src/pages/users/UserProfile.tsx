@@ -39,19 +39,18 @@ function TabPanel({ children, value, index, ...other }: TabPanelProps) {
 export default function UserProfiles() {
   const [tabValue, setTabValue] = useState(0);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+
   const [formCreate, setFormCreate] = useState<UserProfileCreate>({
     user_id: 0,
     position: '',
     skills: '',
     bio: '',
-    profile_pic: '',
   });
 
   const [formUpdate, setFormUpdate] = useState<UserProfileUpdate>({
     position: '',
     skills: '',
     bio: '',
-    profile_pic: '',
   });
 
   const userProfileQuery = useUserProfile(selectedUserId ?? 0);
@@ -67,7 +66,6 @@ export default function UserProfiles() {
         position: '',
         skills: '',
         bio: '',
-        profile_pic: '',
       });
     }
   };
@@ -86,17 +84,16 @@ export default function UserProfiles() {
     }
   };
 
-  // Load profile data into update form when a user is selected and profile data is fetched
   useEffect(() => {
     if (userProfileQuery.data && tabValue === 2) {
       setFormUpdate({
         position: userProfileQuery.data.position || '',
         skills: userProfileQuery.data.skills || '',
         bio: userProfileQuery.data.bio || '',
-        profile_pic: userProfileQuery.data.profile_pic || '',
       });
     }
   }, [userProfileQuery.data, selectedUserId, tabValue]);
+
   return (
     <Stack spacing={3}>
       <Typography variant="h4">User Profiles</Typography>
@@ -151,16 +148,10 @@ export default function UserProfiles() {
               label="Bio"
               multiline
               value={formCreate.bio}
-              onChange={(e) => setFormCreate((prev) => ({ ...prev, bio: e.target.value }))}
-            />
-            <TextField
-              label="Profile Picture URL"
-              value={formCreate.profile_pic}
               onChange={(e) =>
-                setFormCreate((prev) => ({ ...prev, profile_pic: e.target.value }))
+                setFormCreate((prev) => ({ ...prev, bio: e.target.value }))
               }
             />
-
             <Button variant="contained" onClick={handleCreateSubmit}>
               Create Profile
             </Button>
@@ -184,19 +175,29 @@ export default function UserProfiles() {
             </TextField>
 
             {selectedUserId && userProfileQuery.data ? (
-              <Card sx={{ mt: 2, p: 2 }}>
-                <Typography variant="h6">Profile Details</Typography>
-                <Typography><strong>Position:</strong> {userProfileQuery.data.position}</Typography>
-                <Typography><strong>Skills:</strong> {userProfileQuery.data.skills}</Typography>
-                <Typography><strong>Bio:</strong> {userProfileQuery.data.bio}</Typography>
-                <Box sx={{ mt: 1 }}>
-                  <Typography><strong>Profile Picture:</strong></Typography>
-                  <img
-                    src={userProfileQuery.data.profile_pic}
-                    alt="Profile"
-                    style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: 8 }}
-                  />
-                </Box>
+              <Card sx={{ mt: 2, p: 3 }}>
+                <Stack spacing={2}>
+                  <Box>
+                    <Typography variant="subtitle2">Position</Typography>
+                    <Typography variant="body1" sx={{ pl: 1 }}>
+                      {userProfileQuery.data.position}
+                    </Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="subtitle2">Skills</Typography>
+                    <Typography variant="body1" sx={{ pl: 1 }}>
+                      {userProfileQuery.data.skills}
+                    </Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="subtitle2">Bio</Typography>
+                    <Typography variant="body1" sx={{ pl: 1 }}>
+                      {userProfileQuery.data.bio}
+                    </Typography>
+                  </Box>
+                </Stack>
               </Card>
             ) : (
               <Typography>Select a user to view their profile.</Typography>
@@ -238,13 +239,6 @@ export default function UserProfiles() {
               multiline
               value={formUpdate.bio}
               onChange={(e) => setFormUpdate((prev) => ({ ...prev, bio: e.target.value }))}
-            />
-            <TextField
-              label="Profile Pic URL"
-              value={formUpdate.profile_pic}
-              onChange={(e) =>
-                setFormUpdate((prev) => ({ ...prev, profile_pic: e.target.value }))
-              }
             />
             <Button
               variant="contained"
