@@ -4,7 +4,7 @@ import { Outlet } from 'react-router-dom';
 const AuthLayout: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background-main py-12 px-4 sm:px-6 ">
-      <div className="w-full max-w-md space-y-8">
+      <div className="w-full max-w-4xl space-y-8">
         {/* Logo */}
         <div className="flex justify-center">
           <img

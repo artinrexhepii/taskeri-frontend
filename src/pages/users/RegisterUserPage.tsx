@@ -51,7 +51,7 @@ const RegisterUserPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Register a New User</h2>
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
@@ -60,26 +60,26 @@ const RegisterUserPage: React.FC = () => {
               label="First Name"
               {...register('first_name', { required: 'First name is required' })}
               error={errors.first_name?.message}
-              className="w-full"
+              className="border-gray-300 focus:ring-teal-500 focus:border-teal-500"
             />
             <Input
               label="Last Name"
               {...register('last_name', { required: 'Last name is required' })}
               error={errors.last_name?.message}
-              className="w-full"
+              className="border-gray-300 focus:ring-teal-500 focus:border-teal-500"
             />
             <Input
               label="Email"
               type="email"
               {...register('email', { required: 'Email is required' })}
               error={errors.email?.message}
-              className="w-full"
+              className="border-gray-300 focus:ring-teal-500 focus:border-teal-500"
             />
             <Input
               label="Role"
               {...register('role', { required: 'Role is required' })}
               error={errors.role?.message}
-              className="w-full"
+              className="border-gray-300 focus:ring-teal-500 focus:border-teal-500"
             />
             <Select
               label="Team"
@@ -90,7 +90,7 @@ const RegisterUserPage: React.FC = () => {
                 // Update the value in react-hook-form
                 setValue('teamId', e.target.value, { shouldValidate: true });
               }}
-              className="w-full"
+              className="border-gray-300 focus:ring-teal-500 focus:border-teal-500"
             >
               <option value="">Select a team</option>
               {teams?.map((team) => (
@@ -108,7 +108,7 @@ const RegisterUserPage: React.FC = () => {
                 // Update the value in react-hook-form
                 setValue('department_id', e.target.value, { shouldValidate: true });
               }}
-              className="w-full"
+              className="border-gray-300 focus:ring-teal-500 focus:border-teal-500"
             >
               <option value="">Select a department</option>
               {departments?.map((department) => (
@@ -119,7 +119,7 @@ const RegisterUserPage: React.FC = () => {
             </Select>
           </div>
           <div>
-            <Button type="submit" variant="primary" isLoading={isLoading} className="w-full">
+            <Button type="submit" variant="primary" isLoading={isLoading} className="w-full py-2 px-4 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-md shadow-md">
               Register User
             </Button>
           </div>

@@ -45,12 +45,13 @@ const RegisterTeamPage: React.FC = () => {
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Register Your Team
         </h2>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+        <form className="mt-8 space-y-6 bg-white p-6 rounded-lg shadow-lg" onSubmit={handleSubmit(onSubmit)}>
           <div className="rounded-md shadow-sm space-y-4">
             <Input
               label="Team Name"
               {...register('name', { required: 'Team name is required' })}
               error={errors.name?.message}
+              className="border-gray-300 focus:ring-teal-500 focus:border-teal-500"
             />
             <Select
               label="Department"
@@ -61,6 +62,7 @@ const RegisterTeamPage: React.FC = () => {
                 // Update the value in react-hook-form
                 setValue('departmentId', e.target.value, { shouldValidate: true });
               }}
+              className="border-gray-300 focus:ring-teal-500 focus:border-teal-500"
             >
               <option value="">Select a department</option>
               {departments?.map((department) => (
@@ -71,7 +73,7 @@ const RegisterTeamPage: React.FC = () => {
             </Select>
           </div>
           <div>
-            <Button type="submit" variant="primary" isLoading={isLoading}>
+            <Button type="submit" variant="primary" isLoading={isLoading} className="w-full py-2 px-4 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-md shadow-md">
               Register Team
             </Button>
           </div>

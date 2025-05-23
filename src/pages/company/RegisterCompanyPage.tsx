@@ -46,23 +46,23 @@ const RegisterCompanyPage: React.FC = () => {
               label="Company Name"
               {...register('name', { required: 'Company name is required' })}
               error={errors.name?.message}
-              className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+              className="border-gray-300 focus:ring-teal-500 focus:border-teal-500"
             />
             <Input
               label="Industry"
               {...register('industry', { required: 'Industry is required' })}
               error={errors.industry?.message}
-              className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+              className="border-gray-300 focus:ring-teal-500 focus:border-teal-500"
             />
             <Input
               label="Country"
               {...register('country', { required: 'Country is required' })}
               error={errors.country?.message}
-              className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+              className="border-gray-300 focus:ring-teal-500 focus:border-teal-500"
             />
           </div>
           <div>
-            <Button type="submit" variant="primary" isLoading={isLoading} className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md shadow-md">
+            <Button type="submit" variant="primary" isLoading={isLoading} className="w-full py-2 px-4 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-md shadow-md">
               Register Company
             </Button>
           </div>
@@ -80,7 +80,7 @@ const RegisterCompanyPage: React.FC = () => {
           </ul>
         </div>
         <div className="mt-4">
-          <Button variant="secondary" onClick={() => navigate('/register-department')}>
+          <Button variant="secondary" className="w-full py-2 px-4 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-md shadow-md" onClick={() => navigate('/register-department')}>
             Proceed to Department Registration
           </Button>
         </div>
