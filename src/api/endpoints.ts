@@ -15,7 +15,7 @@ export const API_ENDPOINTS = {
     
     // Task endpoints
     TASKS: {
-      BASE: '/tasks',
+      BASE: '/tasks/',
       DETAIL: (id: number) => `/tasks/${id}`,
       DETAILS: (id: number) => `/tasks/${id}/details`,
       BY_PROJECT: (projectId: number) => `/tasks/project/${projectId}`,
@@ -106,7 +106,7 @@ export const API_ENDPOINTS = {
     
     // Company endpoints
     COMPANIES: {
-      BASE: '/companies',
+      BASE: '/companies/',
       DETAIL: (id: number) => `/companies/${id}`,
       SETTINGS: (id: number) => `/companies/${id}/settings`,
     },
