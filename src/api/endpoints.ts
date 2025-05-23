@@ -94,7 +94,7 @@ export const API_ENDPOINTS = {
     // User roles endpoints
     USER_ROLES: {
       USER_ROLES: (userId: number) => `/user-roles/${userId}/roles`,
-      ADD_ROLE: (userId: number, roleId: number) => `/user-roles/${userId}/roles/${roleId}`,
+      ASSIGN_ROLE: (userId: number, roleId: number) => `/user-roles/${userId}/roles/${roleId}`,
     },
     
     // Role permissions endpoints
@@ -125,13 +125,6 @@ export const API_ENDPOINTS = {
       MY_PROJECTS: '/project-users/me/projects',
     },
   
-    // Activity log endpoints
-    ACTIVITY_LOGS: {
-      BASE: '/activity-logs',
-      BY_USER: (userId: number) => `/activity-logs/user/${userId}`,
-      MY_RECENT: '/activity-logs/me/recent',
-    },
-  
     // Notification endpoints
     NOTIFICATIONS: {
       BASE: '/notifications',
@@ -143,5 +136,5 @@ export const API_ENDPOINTS = {
         DETAIL: (id: number) => `/tenants/${id}`,
         USERS: (tenantId: number) => `/tenants/${tenantId}/users`,
         ADD_USER: (tenantId: number) => `/tenants/${tenantId}/users`,
-      },
+    },
   };

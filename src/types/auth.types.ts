@@ -12,6 +12,7 @@ export interface LoginRequest {
     id: number;
     created_at: string;
     updated_at: string;
+    role_id: number;
   };
 }
 
@@ -42,5 +43,6 @@ export interface AuthResponse {
     id: number;
     created_at: string;
     updated_at: string;
+    role_id: number;
   };
 }

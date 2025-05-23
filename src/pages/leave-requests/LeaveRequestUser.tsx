@@ -8,10 +8,12 @@ import {
 } from '@mui/material';
 import { useUserLeaveRequests } from '../../api/hooks/leave-requests/useUserLeaveRequests';
 import { useDeleteLeaveRequest } from '../../api/hooks/leave-requests/useDeleteLeaveRequest';
+import { useAuth } from '../../context/AuthContext'; // or wherever it's defined
 
 
 export default function UserLeaveRequests() {
-  const userId = 1; // Replace with auth context or prop
+  const { user } = useAuth();
+  const userId = user?.id ?? 1;
   const { data } = useUserLeaveRequests(userId);
   const deleteLeaveRequest = useDeleteLeaveRequest();
 

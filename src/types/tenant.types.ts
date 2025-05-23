@@ -5,7 +5,8 @@ export interface TenantUser {
   id: number;
   user_id: number;
   tenant_id: number;
-  is_active: boolean;
+  team_id?: number ;
+  department_id?: number;
   role_id?: number;
   created_at: string;
   updated_at: string;
@@ -16,12 +17,10 @@ export interface TenantUser {
 export interface TenantUserCreate {
   user_id: number;
   role_id?: number;
-  is_active?: boolean;
 }
 
 export interface TenantUserUpdate {
   role_id?: number;
-  is_active?: boolean;
 }
 
 export interface TenantUserListResponse {

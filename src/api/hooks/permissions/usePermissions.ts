@@ -9,5 +9,3 @@ export const usePermissions = (enabled = true) => {
     enabled,
   });
 };
-
-export default usePermissions;

@@ -34,9 +34,9 @@ export interface UserDetails {
   last_name: string;
   department_id: number | null;
   team_id: number | null;
+  role_id: number;
   tenant_schema?: string;
   tenant_id?: number;
-  is_active?: boolean;
   roles?: RoleResponse[];
   permissions?: string[];
   created_at?: string;
@@ -64,3 +64,4 @@ export interface UserBasicInfo {
   last_name: string;
   email: string;
 }
+

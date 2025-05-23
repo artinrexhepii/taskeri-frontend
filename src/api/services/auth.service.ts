@@ -30,7 +30,11 @@ export const login = async (credentials: LoginRequest): Promise<AuthResponse> =>
     
     // Store the raw token without any prefix
     localStorage.setItem('access_token', response.access_token);
-    localStorage.setItem('user', JSON.stringify(response.user));
+    
+    // Store the complete user object including role_id
+    if (response.user) {
+      localStorage.setItem('user', JSON.stringify(response.user));
+    }
     
     // Verify the token was stored correctly
     const storedToken = localStorage.getItem('access_token');

@@ -1,5 +1,4 @@
 import apiClient from '../apiClient';
-import { API_ENDPOINTS } from '../endpoints';
 import { 
   CompanySettingsCreate, 
   CompanySettingsUpdate, 
@@ -7,7 +6,7 @@ import {
 } from '../../types/company.types';
 
 export const getCompanySettings = async (companyId: number): Promise<CompanySettingsResponse> => {
-  return apiClient.get(API_ENDPOINTS.COMPANIES.SETTINGS(companyId));
+  return apiClient.get(`/company-settings/${companyId}`);
 };
 
 export const createCompanySettings = async (settings: CompanySettingsCreate): Promise<CompanySettingsResponse> => {

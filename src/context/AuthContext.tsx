@@ -67,7 +67,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setError(null);
     try {
       if (credentials.user) {
-        setUser(credentials.user);
+        // Make sure we store the complete user object including role_id
+        const completeUser = {
+          ...credentials.user,
+          role_id: credentials.user.role_id
+        };
+        setUser(completeUser);
+        localStorage.setItem('user', JSON.stringify(completeUser));
         return true;
       }
       return false;

@@ -14,11 +14,13 @@ export const getTasks = async (
   page = 1, 
   pageSize = 10, 
   filters?: TaskFilterParams
-): Promise<PaginatedResponse<TaskResponse>> => {
+): Promise<PaginatedResponse<TaskDetailResponse>> => {
+  
   return apiClient.get(API_ENDPOINTS.TASKS.BASE, {
     params: {
       page,
       page_size: pageSize,
+      include: ['assigned_users_details'],
       ...filters
     }
   });

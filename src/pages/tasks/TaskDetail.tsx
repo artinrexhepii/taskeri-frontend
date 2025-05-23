@@ -71,6 +71,12 @@ const TaskDetail: React.FC = () => {
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
   const { data: tasksData } = useTasks();
+
+  // Get all assigned users instead of just the first one
+  const assignedUsers = task?.assigned_users
+    ? users.filter(user => task.assigned_users?.includes(user.id))
+    : [];
+
   const [editFormData, setEditFormData] = useState<TaskUpdate>({
     name: '',
     description: '',
@@ -189,7 +195,6 @@ const TaskDetail: React.FC = () => {
     }
   };
 
-  const assignedUser = users.find(user => user.id === task.assigned_users?.[0]);
   const project = projects.find(project => project.id === task.project_id);
 
   return (
@@ -264,7 +269,12 @@ const TaskDetail: React.FC = () => {
                   Assigned To
                 </p>
                 <p className="text-sm font-medium text-text-primary">
-                  {assignedUser ? `${assignedUser.first_name} ${assignedUser.last_name}` : 'Unassigned'}
+                  {assignedUsers && assignedUsers.length > 0 
+                    ? assignedUsers.map(user => {
+                        return `${user.first_name} ${user.last_name}`;
+                      }).filter(Boolean).join(', ')
+                    : 'Unassigned'
+                  }
                 </p>
               </div>
               

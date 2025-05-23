@@ -5,7 +5,7 @@ export const useAssignUserToProject = () => {
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, { projectId: number; userId: number }>({
-    mutationFn: ({ projectId, userId }) => assignUserToProject(projectId, userId),
+    mutationFn: ({ userId, projectId }) => assignUserToProject(userId, projectId),
     onSuccess: (_, variables) => {
       // Invalidate project users query
       queryClient.invalidateQueries({ 

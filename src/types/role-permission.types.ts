@@ -31,4 +31,8 @@ export interface RolePermissionBase {
 
 export interface RolePermissionCreate extends RolePermissionBase {}
 
-export interface RolePermissionResponse extends RolePermissionBase {}
+export interface RolePermissionResponse {
+  id: number;
+  name: string;
+  description?: string;
+}

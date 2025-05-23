@@ -7,9 +7,9 @@ export const getUserRoles = async (userId: number): Promise<RoleResponse[]> => {
 };
 
 export const assignRoleToUser = async (userId: number, roleId: number): Promise<{message: string}> => {
-  return apiClient.post(API_ENDPOINTS.USER_ROLES.ADD_ROLE(userId, roleId), {});
+  return apiClient.put(API_ENDPOINTS.USER_ROLES.ASSIGN_ROLE(userId, roleId), {});
 };
 
 export const removeRoleFromUser = async (userId: number, roleId: number): Promise<{message: string}> => {
-  return apiClient.delete(API_ENDPOINTS.USER_ROLES.ADD_ROLE(userId, roleId));
+  return apiClient.delete(API_ENDPOINTS.USER_ROLES.ASSIGN_ROLE(userId, roleId));
 };

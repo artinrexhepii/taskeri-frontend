@@ -8,3 +8,5 @@ export const useTeams = () => {
     queryFn: getTeams,
   });
 };
+
+export default useTeams;

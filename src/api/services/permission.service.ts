@@ -7,7 +7,7 @@ import {
 } from '../../types/role-permission.types';
 
 export const getPermissions = async (): Promise<PermissionResponse[]> => {
-  return apiClient.get(API_ENDPOINTS.PERMISSIONS.BASE);
+  return apiClient.get('/permissions');
 };
 
 export const getPermissionById = async (id: number): Promise<PermissionResponse> => {

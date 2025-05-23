@@ -29,6 +29,10 @@ const RegisterTeamPage = lazy(() => import('../pages/team/RegisterTeamPage'));
 const RegisterUserPage = lazy(() => import('../pages/users/RegisterUserPage'));
 const LeaveRequests = lazy(() => import('../pages/leave-requests/LeaveRequestBase'))
 const Invoices = lazy(() => import('../pages/invoices/InvoiceNav'))
+const Companies = lazy(() => import('../pages/company/CompanyList'))
+const CompanyDepartmentsPage = lazy(() => import('../pages/company/CompanyDepartments'));
+const RolePermissionPage = lazy(() => import('../pages/role-permissions/RolePermissions'));
+
 
 export interface Route {
   path: string;
@@ -87,12 +91,12 @@ export const routes: Routes = {
   // Task routes
   tasks: {
     path: '/tasks',
-    component: TaskList,
+    component: TaskBoard,
     protected: true
   },
-  taskBoard: {
-    path: '/tasks/board',
-    component: TaskBoard,
+  taskList: {
+    path: '/tasks/list',
+    component: TaskList,
     protected: true
   },
   taskCalendar: {
@@ -201,7 +205,26 @@ export const routes: Routes = {
     path: '/invoices',
     component: Invoices,
     protected: true
-  }
+  },
+
+  companies:{
+    path: '/companies',
+    component: Companies,
+    protected: true
+  },
+
+  companyDepartments: {
+  path: '/companies/:companyId/departments',
+  component: CompanyDepartmentsPage,
+  protected: true
+},
+
+ rolePermissions: {
+  path: '/rolepermissions',
+  component: RolePermissionPage,
+  protected: true
+ }
+
 };
 
 export const getRoute = (key: keyof Routes): Route => routes[key];
