@@ -96,7 +96,7 @@ const Dashboard: React.FC = () => {
           variants={itemVariants}
         >
           <div className="mb-4 md:mb-0">
-            <h1 className="text-4xl font-bold text-black mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
+            <h1 className="text-4xl font-bold text- dark:text-black mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
               Welcome back, {user?.first_name || 'User'} 👋
             </h1>
             <p className="text-gray-800 text-lg">
