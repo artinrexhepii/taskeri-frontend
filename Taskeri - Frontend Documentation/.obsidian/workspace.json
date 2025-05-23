@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "05-API-Integration.md",
+                "file": "01-Architecture.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "05-API-Integration"
+              "title": "01-Architecture"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "05-API-Integration.md",
+                "file": "01-Architecture.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for 05-API-Integration"
+              "title": "Backlinks for 01-Architecture"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "05-API-Integration.md",
+                "file": "01-Architecture.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from 05-API-Integration"
+              "title": "Outgoing links from 01-Architecture"
             }
           },
           {
@@ -142,13 +142,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "05-API-Integration.md",
+                "file": "01-Architecture.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 05-API-Integration"
+              "title": "Outline of 01-Architecture"
             }
           }
         ]
@@ -170,10 +170,11 @@
   },
   "active": "390869ef2b1db2b8",
   "lastOpenFiles": [
+    "00-Getting-Started.md",
+    "05-API-Integration.md",
     "06-State-Management.md",
     "07-Styling-Theme.md",
     "08-Project-Structure.md",
-    "05-API-Integration.md",
     "04-Features.md",
     "03-Authentication-Authorization.md",
     "02-Component-Structure.md",

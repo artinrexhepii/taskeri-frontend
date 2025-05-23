@@ -30,6 +30,7 @@ Taskeri is a comprehensive task and project management application designed to s
 6. [State Management](./Taskeri%20-%20Frontend%20Documentation/06-State-Management.md)
 7. [Styling & Theme](./Taskeri%20-%20Frontend%20Documentation/07-Styling-Theme.md)
 8. [Project Structure](./Taskeri%20-%20Frontend%20Documentation/08-Project-Structure.md)
+9. [How to start the project](./Taskeri%20-%20Frontend%20Documentation/00-Getting-Started.md)
 
 ```mermaid
 graph TD
