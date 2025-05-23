@@ -1,155 +1,168 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { useTaskStatistics } from "../../api/hooks/tasks/useTaskStatistics";
+import { useProjectStatistics } from "../../api/hooks/projects/useProjectStatistics";
+import { useTasks } from "../../api/hooks/tasks/useTasks";
 import {
-  Box,
-  Card,
-  Grid,
-  Stack,
-  Tab,
-  Tabs,
-  Typography,
-  TextField,
-  MenuItem,
-} from '@mui/material';
-import { useProjectStatistics } from '../../api/hooks/projects/useProjectStatistics';
-import { useTeamStatistics } from '../../api/hooks/teams/useTeamStatistics';
-import useTenantUsers from '../../api/hooks/tenants/useTenantUsers';
+  containerVariants,
+  itemVariants,
+  ProjectOverviewCards,
+  TaskOverviewCards,
+  TaskDistributionCard,
+  ReportTabs,
+} from "../../components/features/reports";
 
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`reports-tabpanel-${index}`}
-      aria-labelledby={`reports-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
+import {
+  TaskStatistics,
+  ProjectStatistics,
+} from "../../components/features/reports/types";
 
 export default function Reports() {
-  const [tabValue, setTabValue] = useState(0);
-  const { data: projectStats, isLoading: isLoadingProjectStats } = useProjectStatistics();
-  const { data: teamStats, isLoading: isLoadingTeamStats } = useTeamStatistics();
+  const [activeTab, setActiveTab] = useState("projects");
+  const [expandedStatus, setExpandedStatus] = useState<string | null>(null);
 
-  const [selectedTeamId, setSelectedTeamId] = useState<number | ''>('');
+  const { data: taskStats, isLoading: isLoadingTaskStats } =
+    useTaskStatistics();
+  const { data: projectStats, isLoading: isLoadingProjectStats } =
+    useProjectStatistics();
+  const { data: tasksData } = useTasks({ pageSize: 100 }); // Fetch all tasks
+  const tasks = tasksData?.items || [];
 
-  const tenantId = 1; // Replace with actual tenant ID logic
-  const {
-    data: tenantUsers,
-    isLoading: isLoadingTenantUsers,
-  } = useTenantUsers(tenantId, { page: 1, pageSize: 100 });
+  // Group tasks by status
+  const tasksByStatus = useMemo(() => {
+    const grouped: { [key: string]: typeof tasks } = {};
 
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
+    // First initialize all status groups from taskStats
+    if (taskStats?.tasks_by_status) {
+      Object.keys(taskStats.tasks_by_status).forEach((status) => {
+        grouped[status] = [];
+      });
+    }
+
+    // Then populate with actual tasks
+    if (tasks && tasks.length > 0) {
+      tasks.forEach((task) => {
+        if (task?.status) {
+          if (!grouped[task.status]) {
+            grouped[task.status] = [];
+          }
+          grouped[task.status].push(task);
+        }
+      });
+    }
+
+    return grouped;
+  }, [tasks, taskStats?.tasks_by_status]);
+
+  const exportTaskStatisticsToCSV = () => {
+    if (!taskStats || !tasks) return;
+
+    // Create CSV content for task statistics
+    const statsHeaders = ["Status", "Number of Tasks"];
+    const statsRows = Object.entries(taskStats.tasks_by_status || {}).map(
+      ([status, count]) => [status, count]
+    );
+
+    const statsContent = [statsHeaders, ...statsRows]
+      .map((row) => row.join(","))
+      .join("\n");
+
+    // Create CSV content for task details
+    const taskDetailsHeaders = ["Task Name", "Status", "Created Date"];
+    const taskDetailsRows = tasks.map((task) => [
+      task.name?.replace(/,/g, ";") || "",
+      task.status || "",
+      task.created_at ? new Date(task.created_at).toLocaleDateString() : "",
+    ]);
+
+    const taskDetailsContent = [taskDetailsHeaders, ...taskDetailsRows]
+      .map((row) => row.join(","))
+      .join("\n");
+
+    // Download task statistics CSV
+    const date = new Date().toISOString().split("T")[0];
+    downloadCSV(statsContent, `task_statistics_summary_${date}.csv`);
+    downloadCSV(taskDetailsContent, `task_details_${date}.csv`);
   };
 
-  const teamMembers =
-    tenantUsers?.items.filter((u) => u.team_id === selectedTeamId) || [];
+  const downloadCSV = (content: string, filename: string) => {
+    const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
 
-  if (isLoadingProjectStats || isLoadingTeamStats || isLoadingTenantUsers) {
-    return <Typography>Loading...</Typography>;
+  const handleStatusClick = (status: string) => {
+    setExpandedStatus(expandedStatus === status ? null : status);
+  };
+
+  if (isLoadingProjectStats || isLoadingTaskStats) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
+      </div>
+    );
   }
 
+  const projectStatistics =
+    projectStats ||
+    ({
+      Not_Started: 0,
+      In_Progress: 0,
+      Completed: 0,
+      On_Hold: 0,
+    } as ProjectStatistics);
+
+  const taskStatistics = taskStats || {
+    total_tasks: 0,
+    completed_tasks: 0,
+    overdue_tasks: 0,
+    tasks_by_status: {},
+    tasks_by_priority: {},
+  };
+
   return (
-    <Stack spacing={3}>
-      <Typography variant="h4">Reports</Typography>
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="container mx-auto px-4 py-8 max-w-7xl"
+    >
+      <motion.div variants={itemVariants} className="space-y-8">
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Reports & Analytics
+          </h1>
+          <p className="mt-1 text-gray-500">
+            View detailed statistics and analytics about your tasks and projects
+          </p>
+        </div>
 
-      <Card>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={tabValue} onChange={handleTabChange}>
-            <Tab label="Project Statistics" />
-            <Tab label="Team Statistics" />
-          </Tabs>
-        </Box>
+        <ReportTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-        <TabPanel value={tabValue} index={0}>
-          <Grid container spacing={3}>
-            {projectStats && (
-              <>
-                <Grid sx={{ width: { xs: '100%', md: '33.33%' } }}>
-                  <Card sx={{ p: 2 }}>
-                    <Typography variant="subtitle2">Projects Overview</Typography>
-                    <Typography variant="body1">
-                      {projectStats ? 'Project statistics available' : 'No project data'}
-                    </Typography>
-                  </Card>
-                </Grid>
-                <Grid sx={{ width: { xs: '100%', md: '33.33%' } }}>
-                  <Card sx={{ p: 2 }}>
-                    <Typography variant="subtitle2">Total Projects</Typography>
-                    <Typography variant="h4">
-                      {projectStats ? Object.keys(projectStats).length : 0}
-                    </Typography>
-                  </Card>
-                </Grid>
-                <Grid sx={{ width: { xs: '100%', md: '33.33%' } }}>
-                  <Card sx={{ p: 2 }}>
-                    <Typography variant="subtitle2">Completed Projects</Typography>
-                    <Typography variant="h4">
-                      {projectStats.Completed ? '0' : '0'}
-                    </Typography>
-                  </Card>
-                </Grid>
-              </>
-            )}
-          </Grid>
-        </TabPanel>
-
-        <TabPanel value={tabValue} index={1}>
-          <Stack spacing={3}>
-            <Card sx={{ p: 2 }}>
-              <Typography variant="subtitle2">Team Performance</Typography>
-              {teamStats &&
-                Object.entries(teamStats.stats).map(([teamId, count]) => (
-                  <Typography key={teamId} variant="body2">
-                    Team {teamId}: {count} active tasks
-                  </Typography>
-                ))}
-            </Card>
-
-            <TextField
-              select
-              fullWidth
-              label="Select Team"
-              value={selectedTeamId}
-              onChange={(e) => setSelectedTeamId(Number(e.target.value))}
-            >
-              {teamStats &&
-                Object.keys(teamStats.stats).map((teamId) => (
-                  <MenuItem key={teamId} value={Number(teamId)}>
-                    Team {teamId}
-                  </MenuItem>
-                ))}
-            </TextField>
-
-            {selectedTeamId && (
-              <Card sx={{ p: 2 }}>
-                <Typography variant="subtitle2">Team Members</Typography>
-                {teamMembers.length > 0 ? (
-                  teamMembers.map((member) => (
-                    <Typography key={member.id}>
-                      {member.user?.first_name} {member.user?.last_name}
-                    </Typography>
-                  ))
-                ) : (
-                  <Typography>No members found for this team.</Typography>
-                )}
-              </Card>
-            )}
-          </Stack>
-        </TabPanel>
-      </Card>
-    </Stack>
+        {/* Content */}
+        {activeTab === "projects" ? (
+          <ProjectOverviewCards projectStats={projectStatistics} />
+        ) : (
+          <>
+            <TaskOverviewCards taskStats={taskStatistics} />
+            <TaskDistributionCard
+              taskStats={taskStatistics}
+              tasksByStatus={tasksByStatus}
+              expandedStatus={expandedStatus}
+              onStatusClick={handleStatusClick}
+              onExportClick={exportTaskStatisticsToCSV}
+            />
+          </>
+        )}
+      </motion.div>
+    </motion.div>
   );
 }

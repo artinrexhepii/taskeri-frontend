@@ -31,6 +31,8 @@ const LeaveRequests = lazy(() => import('../pages/leave-requests/LeaveRequestBas
 const Invoices = lazy(() => import('../pages/invoices/InvoiceNav'))
 const Companies = lazy(() => import('../pages/company/CompanyList'))
 const CompanyDepartmentsPage = lazy(() => import('../pages/company/CompanyDepartments'));
+const RolePermissionPage = lazy(() => import('../pages/role-permissions/RolePermissions'));
+
 
 export interface Route {
   path: string;
@@ -215,7 +217,13 @@ export const routes: Routes = {
   path: '/companies/:companyId/departments',
   component: CompanyDepartmentsPage,
   protected: true
-}
+},
+
+ rolePermissions: {
+  path: '/rolepermissions',
+  component: RolePermissionPage,
+  protected: true
+ }
 
 };
 
