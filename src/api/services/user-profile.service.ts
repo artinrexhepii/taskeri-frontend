@@ -11,7 +11,7 @@ export const getUserProfile = async (userId: number): Promise<UserProfileRespons
 };
 
 export const createUserProfile = async (profile: UserProfileCreate): Promise<UserProfileResponse> => {
-  return apiClient.post('/profiles', profile);
+  return apiClient.post('/profiles/', profile);
 };
 
 export const updateUserProfile = async (userId: number, profile: UserProfileUpdate): Promise<UserProfileResponse> => {
