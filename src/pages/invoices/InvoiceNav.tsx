@@ -182,7 +182,7 @@ export default function Invoices() {
               >
                 {companyQuery.data?.map((company) => (
                   <MenuItem key={company.id} value={company.id}>
-                    Company #{company.id}
+                    {company.name}
                   </MenuItem>
                 ))}
               </TextField>
