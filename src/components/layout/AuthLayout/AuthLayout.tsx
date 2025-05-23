@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 
 const AuthLayout: React.FC = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background-main py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-background-main py-12 px-4 sm:px-6 ">
       <div className="w-full max-w-md space-y-8">
         {/* Logo */}
         <div className="flex justify-center">
@@ -15,7 +15,7 @@ const AuthLayout: React.FC = () => {
         </div>
 
         {/* Auth content */}
-        <div className="bg-background-paper py-8 px-4 shadow-sm rounded-lg sm:px-10">
+        <div className="bg-background-paper w-full py-8 px-4 shadow-sm rounded-lg sm:px-10">
           <Outlet />
         </div>
 
