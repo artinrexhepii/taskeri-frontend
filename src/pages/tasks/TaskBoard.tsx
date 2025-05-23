@@ -27,6 +27,7 @@ import { useProjects } from '../../api/hooks/projects/useProjects';
 import { TaskPriority, TaskStatus } from '../../types/task.types';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useUpdateTask } from '../../api/hooks/tasks/useUpdateTask';
+import { useDeleteTask } from '../../api/hooks/tasks/useDeleteTask'
 import { TaskResponse } from '../../types/task.types';
 import { format } from 'date-fns';
 import { UserBasicInfo } from '../../types/user.types';
@@ -102,6 +103,19 @@ export default function TaskBoard() {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<number | 'all'>('all');
   const [selectedUser, setSelectedUser] = useState<number | 'all'>('all');
+
+  const deleteTask = useDeleteTask();
+
+const handleDelete = async () => {
+  if (selectedTaskId) {
+    try {
+      await deleteTask.mutateAsync(Number(selectedTaskId));
+    } catch (error) {
+      console.error("Failed to delete task:", error);
+    }
+  }
+  handleMenuClose(); // Close the menu after deleting
+};
 
   const getAssignedUsers = (task: Task): UserBasicInfo[] => {
     if (task.assigned_users_details?.length) {
@@ -390,11 +404,11 @@ export default function TaskBoard() {
             Edit
           </MenuItem>
           <MenuItem
-            onClick={handleMenuClose}
-            className="text-red-600"
-          >
-            Delete
-          </MenuItem>
+          onClick={handleDelete}
+          className="text-red-600"
+        >
+          Delete
+        </MenuItem>
         </Menu>
       </Stack>
     </Container>
