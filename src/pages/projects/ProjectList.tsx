@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   Box,
-  Button,
   Card,
   Container,
   Grid,
@@ -41,6 +40,8 @@ import { format } from 'date-fns';
 import { useDeleteProject } from '../../api/hooks/projects/useDeleteProject';
 import { useAuth } from '../../context/AuthContext';
 import { motion } from 'framer-motion';
+import Button from '../../components/common/Button/Button';
+import { PlusIcon } from '@heroicons/react/24/outline';
 
 export default function ProjectList() {
   const navigate = useNavigate();
@@ -152,22 +153,13 @@ export default function ProjectList() {
                 </Box>
                 {hasAdminPrivileges && (
                   <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => navigate('/projects/new')}
-                    sx={{
-                      bgcolor: 'white',
-                      color: 'primary.main',
-                      '&:hover': {
-                        bgcolor: 'grey.100',
-                        transform: 'translateY(-2px)',
-                        boxShadow: 4,
-                      },
-                      transition: 'all 0.2s ease-in-out',
-                    }}
-                  >
-                    New Project
-                  </Button>
+                  variant="primary"
+                  leftIcon={<PlusIcon className="h-5 w-5" />}
+                  onClick={() => navigate('/projects/new')}
+            
+                >
+                  New Project
+                </Button>
                 )}
               </Box>
             </Card>
@@ -275,7 +267,7 @@ export default function ProjectList() {
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                               <Avatar
                                 sx={{
-                                  bgcolor: 'primary.light',
+                                  bgcolor: 'teal',
                                   mr: 2,
                                   width: 40,
                                   height: 40,

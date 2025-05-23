@@ -1,22 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLogin } from '../../api/hooks/auth/useLogin';
-import {
-  Box,
-  Button,
-  Container,
-  TextField,
-  Typography,
-  Link,
-  Paper,
-  InputAdornment,
-  IconButton,
-  Alert,
-  CircularProgress
-} from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import { Alert } from '@mui/material';
+import Button from '../../components/common/Button/Button';
+import Card from '../../components/common/Card/Card';
+import Input from '../../components/common/Input/Input';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -26,7 +16,6 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/', { replace: true });
@@ -44,102 +33,85 @@ const Login: React.FC = () => {
   const errorMessage = loginMutation.error?.message || authError || 'Login failed. Please check your credentials.';
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Paper
-          elevation={3}
-          sx={{
-            padding: 4,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            width: '100%',
-          }}
-        >
-          <TaskAltIcon sx={{ fontSize: 40, color: 'primary.main', mb: 2 }} />
-          <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
-            Sign in to Taskeri
-          </Typography>
+    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
+      <Card 
+      
+      className="bg-white shadow-2xl rounded-xl w-full max-w-lg -mt-96">
+        <div className="px-6 py-8">
+          <h2 className="text-center text-xl sm:text-4xl font-extrabold text-gray-800">
+            Welcome Back
+          </h2>
+          <p className="text-center text-lg text-gray-600 mt-2">
+            Sign in to your account
+          </p>
+        </div>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
+        <form className="space-y-6 px-6 pb-8" onSubmit={handleSubmit}>
+          <div className="space-y-6">
+            <Input
+              label="Email address"
+              type="email"
+              className="border border-gray-300 rounded-lg shadow-sm focus:ring-teal-500 focus:border-teal-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loginMutation.isPending}
-              error={!!errorMessage}
+              error={errorMessage}
             />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
+
+            <Input
               label="Password"
               type={showPassword ? 'text' : 'password'}
-              id="password"
-              autoComplete="current-password"
+              className="border border-gray-300 rounded-lg shadow-sm focus:ring-teal-500 focus:border-teal-500"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={loginMutation.isPending}
-              error={!!errorMessage}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={() => setShowPassword(!showPassword)}
-                      edge="end"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
+              error={errorMessage}
+              rightIcon={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  {showPassword ? (
+                    <EyeSlashIcon className="h-5 w-5" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5" />
+                  )}
+                </button>
+              }
             />
+          </div>
 
-            {(loginMutation.isError || authError) && (
-              <Alert severity="error" sx={{ mt: 2 }}>
-                {errorMessage}
-              </Alert>
-            )}
+          {(loginMutation.isError || authError) && (
+            <Alert severity="error">
+              {errorMessage}
+            </Alert>
+          )}
 
+          <div>
             <Button
               type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={loginMutation.isPending || !email || !password}
+              variant="secondary"
+              className="w-full bg-teal-600 text-white font-medium rounded-lg shadow-md hover:bg-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+              isLoading={loginMutation.isPending}
+              disabled={!email || !password}
             >
-              {loginMutation.isPending ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                'Sign In'
-              )}
+              Sign In
             </Button>
+          </div>
 
-            <Box sx={{ textAlign: 'center' }}>
-              <Link component={RouterLink} to="/register" variant="body2">
-                Don't have an account? Sign Up
-              </Link>
-            </Box>
-          </Box>
-        </Paper>
-      </Box>
-    </Container>
+          <div className="text-center text-sm">
+            <span className="text-gray-600">Don't have an account? </span>
+            <Link
+              to="/register"
+              className="font-medium text-teal-500 hover:text-teal-400"
+            >
+              Sign up
+            </Link>
+          </div>
+        </form>
+      </Card>
+    </div>
   );
 };
 

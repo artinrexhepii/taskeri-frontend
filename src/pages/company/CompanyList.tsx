@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
   Box,
-  Button,
   Card,
   Dialog,
   DialogActions,
@@ -35,6 +34,8 @@ import { CompanyResponse } from '../../types/company.types';
 import { getPath } from '../../routes/routes';
 import { useAuth } from '../../context/AuthContext';
 import React from 'react';
+import Button from '../../components/common/Button/Button';
+import { PlusIcon } from '@heroicons/react/24/outline';
 
 interface CompanyForm {
   name: string;
@@ -58,19 +59,11 @@ export default function CompanyList() {
     country: '',
   });
 
-  // Only show admin actions for role_id 1
   const hasAdminAccess = useMemo(() => {
     if (!isAuthenticated || !user) return false;
     return user.role_id === 1;
   }, [user, isAuthenticated]);
 
-  // Debug logging
-  useEffect(() => {
-    console.log('Current user role:', user?.role_id);
-    console.log('Has admin access:', hasAdminAccess);
-  }, [user?.role_id, hasAdminAccess]);
-
-  // Refresh data when component mounts, user changes, or authentication changes
   useEffect(() => {
     refetch();
   }, [user?.role_id, isAuthenticated, refetch]);
@@ -78,9 +71,7 @@ export default function CompanyList() {
   const handleDelete = (companyId: number) => {
     if (window.confirm('Are you sure you want to delete this company?')) {
       deleteCompany(companyId, {
-        onSuccess: () => {
-          refetch();
-        }
+        onSuccess: () => refetch(),
       });
     }
   };
@@ -127,9 +118,9 @@ export default function CompanyList() {
         },
       });
     }
-
     setCompanyForm({ name: '', industry: '', country: '' });
   };
+
   const navigate = useNavigate();
 
   const filteredCompanies = companies?.filter((company) =>
@@ -141,24 +132,19 @@ export default function CompanyList() {
   return (
     <>
       <Stack spacing={3}>
-        <Card sx={{ p: 3, bgcolor: 'primary.main', color: 'primary.contrastText' }}>
+        <Card sx={{ p: 3, bgcolor: 'teal.700', color: 'white' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Box>
-              <Typography variant="h4" sx={{ mb: 1 }}>Companies</Typography>
-              <Typography variant="body2" sx={{ opacity: 0.7 }}>
+              <Typography variant="h4" sx={{ mb: 1 }} className='text-black'>Companies</Typography>
+              <Typography variant="body2" className='text-black' sx={{ opacity: 0.9 }}>
                 Manage and track your organization's companies
               </Typography>
             </Box>
             {hasAdminAccess && (
               <Button
-                variant="contained"
-                startIcon={<AddIcon />}
+                variant="primary"
+                leftIcon={<PlusIcon className="h-5 w-5" />}
                 onClick={openCreateModal}
-                sx={{
-                  bgcolor: 'white',
-                  color: 'primary.main',
-                  '&:hover': { bgcolor: 'grey.100' }
-                }}
               >
                 Add Company
               </Button>
@@ -195,9 +181,9 @@ export default function CompanyList() {
                 </TableHead>
                 <TableBody>
                   {filteredCompanies?.map((company) => (
-                    <TableRow 
+                    <TableRow
                       key={company.id}
-                      sx={{ '&:hover': { bgcolor: 'action.hover' } }}
+                      sx={{ '&:hover': { bgcolor: 'teal.50' } }}
                     >
                       <TableCell>
                         <Typography variant="subtitle2">{company.name}</Typography>
@@ -210,24 +196,16 @@ export default function CompanyList() {
                             size="small"
                             onClick={() => navigate(getPath('companyDepartments').replace(':companyId', `${company.id}`))}
                             title="View Departments"
-                            sx={{ color: 'primary.main' }}
+                            sx={{ color: 'teal.700' }}
                           >
                             <InfoIcon />
                           </IconButton>
                           {hasAdminAccess && (
                             <>
-                              <IconButton
-                                size="small"
-                                onClick={() => openEditModal(company)}
-                                sx={{ color: 'primary.main' }}
-                              >
+                              <IconButton size="small" onClick={() => openEditModal(company)} sx={{ color: 'teal.700' }}>
                                 <EditIcon />
                               </IconButton>
-                              <IconButton
-                                size="small"
-                                onClick={() => handleDelete(company.id)}
-                                sx={{ color: 'error.main' }}
-                              >
+                              <IconButton size="small" onClick={() => handleDelete(company.id)} sx={{ color: 'error.main' }}>
                                 <DeleteIcon />
                               </IconButton>
                             </>
@@ -240,9 +218,7 @@ export default function CompanyList() {
                     <TableRow>
                       <TableCell colSpan={4}>
                         <Box sx={{ py: 3, textAlign: 'center' }}>
-                          <Typography color="text.secondary">
-                            No companies found
-                          </Typography>
+                          <Typography color="text.secondary">No companies found</Typography>
                         </Box>
                       </TableCell>
                     </TableRow>
@@ -254,7 +230,6 @@ export default function CompanyList() {
         </Card>
       </Stack>
 
-      {/* Create/Edit Modal */}
       <Dialog open={modalOpen} onClose={() => setModalOpen(false)} fullWidth maxWidth="xs">
         <DialogTitle>
           <Typography variant="h6">
@@ -287,10 +262,10 @@ export default function CompanyList() {
           </Stack>
         </DialogContent>
         <DialogActions sx={{ p: 2.5 }}>
-          <Button variant="outlined" onClick={() => setModalOpen(false)}>
+          <Button variant="outline" onClick={() => setModalOpen(false)}>
             Cancel
           </Button>
-          <Button variant="contained" onClick={handleSave}>
+          <Button variant="primary" onClick={handleSave}>
             {editingCompanyId ? 'Update' : 'Create'}
           </Button>
         </DialogActions>

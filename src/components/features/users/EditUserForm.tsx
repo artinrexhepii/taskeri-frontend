@@ -267,7 +267,7 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({ user, tenantId, onCl
               <div className="flex justify-end gap-3">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   onClick={onClose}
                   className="px-4 py-2 text-sm"
                 >

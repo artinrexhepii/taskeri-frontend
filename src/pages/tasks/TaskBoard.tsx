@@ -31,6 +31,7 @@ import { useDeleteTask } from '../../api/hooks/tasks/useDeleteTask'
 import { TaskResponse } from '../../types/task.types';
 import { format } from 'date-fns';
 import { UserBasicInfo } from '../../types/user.types';
+import { useNotification } from '../../context/NotificationContext';
 
 interface Task extends TaskResponse {
   due_date?: string;
@@ -38,12 +39,12 @@ interface Task extends TaskResponse {
   assigned_users_details?: UserBasicInfo[];
 }
 
-// Display names for the UI
-const TaskStatusDisplayNames: Record<TaskStatus, string> = {
-  [TaskStatus.TODO]: "To Do",
-  [TaskStatus.IN_PROGRESS]: "In Progress",
-  [TaskStatus.TECHNICAL_REVIEW]: "Technical Review",
-  [TaskStatus.DONE]: "Done"
+// Display names for the UI - manually map the exact string values
+const TaskStatusDisplayNames: Record<string, string> = {
+  "To Do": "To Do",
+  "In Progress": "In Progress",
+  "Technical Review": "Technical Review",
+  "Done": "Done"
 };
 
 const getStatusColor = (status: TaskStatus) => {
@@ -74,19 +75,29 @@ const getPriorityColor = (priority: TaskPriority) => {
   }
 };
 
-// Define droppable IDs that match backend values exactly
+// Define droppable IDs
 const DROPPABLE_IDS = {
-  TODO: TaskStatus.TODO,
-  IN_PROGRESS: TaskStatus.IN_PROGRESS,
-  TECHNICAL_REVIEW: TaskStatus.TECHNICAL_REVIEW,
-  DONE: TaskStatus.DONE
+  TODO: 'todo',
+  IN_PROGRESS: 'in-progress',
+  TECHNICAL_REVIEW: 'technical-review',
+  DONE: 'done'
 } as const;
 
-// Map droppable IDs to TaskStatus values (now they are identical)
-const droppableToTaskStatus = DROPPABLE_IDS;
+// Map droppable IDs to TaskStatus values
+const droppableToTaskStatus: Record<string, TaskStatus> = {
+  [DROPPABLE_IDS.TODO]: TaskStatus.TODO,
+  [DROPPABLE_IDS.IN_PROGRESS]: TaskStatus.IN_PROGRESS,
+  [DROPPABLE_IDS.TECHNICAL_REVIEW]: TaskStatus.TECHNICAL_REVIEW,
+  [DROPPABLE_IDS.DONE]: TaskStatus.DONE
+};
 
-// Map TaskStatus values to droppable IDs (now they are identical)
-const taskStatusToDroppable = DROPPABLE_IDS;
+// Map TaskStatus values to droppable IDs
+const taskStatusToDroppable: Record<string, string> = {
+  [TaskStatus.TODO]: DROPPABLE_IDS.TODO,
+  [TaskStatus.IN_PROGRESS]: DROPPABLE_IDS.IN_PROGRESS,
+  [TaskStatus.TECHNICAL_REVIEW]: DROPPABLE_IDS.TECHNICAL_REVIEW,
+  [TaskStatus.DONE]: DROPPABLE_IDS.DONE
+};
 
 export default function TaskBoard() {
   const navigate = useNavigate();
@@ -98,6 +109,7 @@ export default function TaskBoard() {
   const { data: usersData } = useUsers();
   const { data: projectsData } = useProjects();
   const updateTask = useUpdateTask();
+  const { showNotification } = useNotification();
   const tasks = tasksData?.items || [];
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
@@ -166,12 +178,47 @@ const handleDelete = async () => {
     const task = tasks.find((t) => t.id === Number(draggableId));
     if (!task) return;
 
-    const newStatus = droppableToTaskStatus[destination.droppableId as keyof typeof DROPPABLE_IDS];
+    // Get the new status from the destination droppable ID
+    const newStatus = droppableToTaskStatus[destination.droppableId];
+    
+    console.log('Moving task to status:', newStatus); // Debug log
+    
+    // Only proceed if we have a valid status
+    if (!newStatus) {
+      console.error('Invalid destination:', destination.droppableId);
+      showNotification('error', 'Error', 'Failed to update task status - invalid destination');
+      return;
+    }
     
     updateTask.mutate({
       id: task.id,
       taskData: {
         status: newStatus,
+        name: task.name,
+        description: task.description || '',
+        priority: task.priority,
+        due_date: task.due_date || '',
+        project_id: task.project_id,
+        assigned_user_ids: task.assigned_users || [],
+      }
+    }, {
+      onSuccess: () => {
+        const statusDisplayName = TaskStatusDisplayNames[newStatus] || newStatus;
+        showNotification('success', 'Success', `Task moved to ${statusDisplayName}`);
+      },
+      onError: (error) => {
+        showNotification('error', 'Error', 'Failed to update task status');
+        console.error("Failed to update task:", error);
+        console.error("Request data:", {
+          id: task.id,
+          status: newStatus,
+          name: task.name,
+          description: task.description,
+          priority: task.priority,
+          due_date: task.due_date,
+          project_id: task.project_id,
+          assigned_user_ids: task.assigned_users
+        });
       }
     });
   };
@@ -204,6 +251,7 @@ const handleDelete = async () => {
               onClick={() => navigate('/tasks/list')}
               startIcon={<ViewListIcon />}
               className="bg-white"
+              sx={{ color: 'teal' }}
             >
               List View
             </Button>
@@ -212,6 +260,7 @@ const handleDelete = async () => {
               onClick={() => navigate('/tasks/calendar')}
               startIcon={<CalendarIcon />}
               className="bg-white"
+              sx={{ color: 'teal' }}
             >
               Calendar
             </Button>
@@ -220,6 +269,7 @@ const handleDelete = async () => {
               startIcon={<AddIcon />}
               onClick={() => navigate('/tasks/new')}
               className="bg-primary hover:bg-primary/90"
+              sx={{ bgcolor: 'teal' }}
             >
               New Task
             </Button>
@@ -271,7 +321,7 @@ const handleDelete = async () => {
                     <h2 className="text-sm font-semibold text-gray-900">
                       {column.title}
                     </h2>
-                    <Badge badgeContent={column.items.length} color="primary" className="ml-2" />
+                    <Badge badgeContent={column.items.length} color="secondary" className="ml-4" />
                   </div>
                   <Button
                     size="small"

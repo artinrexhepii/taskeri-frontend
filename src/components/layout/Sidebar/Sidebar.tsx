@@ -118,76 +118,58 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
       {/* Sidebar */}
       <aside
+  className={`
+    fixed top-0 left-0 h-full w-64 bg-white dark:bg-teal-950
+    transform transition-transform duration-200 ease-in-out
+    shadow-lg z-50
+    ${isOpen ? "translate-x-0" : "-translate-x-full"}
+    md:translate-x-0
+  `}
+>
+  {/* Logo */}
+  <div className="p-4 border-b border-gray-200 dark:border-teal-800">
+    <Logo />
+  </div>
+
+  {/* Navigation */}
+  <nav className="mt-4 px-2">
+    {filteredNavItems.map((item) => (
+      <Link
+        key={item.path}
+        to={item.path}
         className={`
-        fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800
-        transform transition-transform duration-200 ease-in-out
-        shadow-lg z-50
-        ${isOpen ? "translate-x-0" : "-translate-x-full"}
-        md:translate-x-0
-      `}
+          flex items-center px-4 py-2 rounded-md mb-1
+          transition-colors
+          ${
+            isActive(item.path)
+              ? "bg-teal-100 text-teal-900 dark:bg-teal-700 dark:text-white"
+              : "text-gray-600 hover:bg-teal-50 hover:text-teal-800 dark:text-teal-200 dark:hover:bg-teal-800 dark:hover:text-white"
+          }
+        `}
+        onClick={onClose}
       >
-        {/* Logo */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <Logo />
+        <item.icon className="h-5 w-5 mr-3" />
+        <span className="text-sm font-medium">{item.name}</span>
+      </Link>
+    ))}
+  </nav>
+
+  {/* Footer with User Info */}
+  <div className="absolute bottom-0 left-0 right-0 border-t border-gray-200 dark:border-teal-800 bg-white dark:bg-teal-950">
+    <div className="p-4">
+      <div className="flex items-center">
+        <div>
+          <p className="text-sm font-medium text-gray-900 dark:text-white">
+            {user?.first_name}
+          </p>
+          <p className="text-xs text-gray-500 dark:text-teal-200">
+            {user?.email}
+          </p>
         </div>
-
-        {/* Navigation */}
-        <nav className="mt-4 px-2">
-          {filteredNavItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`
-                flex items-center px-4 py-2 rounded-md mb-1
-                hover:bg-primary/5 hover:text-primary
-                transition-colors
-                ${
-                  isActive(item.path)
-                    ? "bg-primary/10 text-primary"
-                    : "text-gray-600 dark:text-gray-300"
-                }
-              `}
-              onClick={() => onClose()}
-            >
-              <item.icon className="h-5 w-5 mr-3" />
-              <span className="text-sm font-medium">{item.name}</span>
-            </Link>
-          ))}
-        </nav>
-
-        {/* User section with role information */}
-        <div className="absolute bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-          {/* Role information */}
-          <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900">
-            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Current Role
-            </h4>
-            <div className="mt-1 max-h-24 overflow-y-auto">
-              {user?.role_id ? (
-                <div className="text-xs py-1 px-2 my-1 bg-primary/10 text-primary rounded">
-                  {getRoleName(user.role_id)}
-                </div>
-              ) : (
-                <span className="text-xs text-gray-500">No role assigned</span>
-              )}
-            </div>
-          </div>
-
-          {/* User info */}
-          <div className="p-4">
-            <div className="flex items-center">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  {user?.first_name}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {user?.email}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </aside>
+      </div>
+    </div>
+  </div>
+</aside>
     </>
   );
 };

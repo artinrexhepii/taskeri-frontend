@@ -58,6 +58,7 @@ export default function TaskCalendar() {
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => navigate('/tasks/new')}
+            sx={{ bgcolor: 'teal', color: 'white' }}
           >
             New Task
           </Button>

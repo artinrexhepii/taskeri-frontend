@@ -91,7 +91,7 @@ const RegisterPage: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-      <Card className="bg-white shadow-2xl rounded-xl">
+      <Card className="bg-white shadow-2xl rounded-xl -mt-20">
         <div className="px-6 py-8">
           <h2 className="text-center text-4xl font-extrabold text-gray-800">
             Register Company Account

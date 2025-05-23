@@ -208,7 +208,7 @@ const TenantUsersPage: React.FC = () => {
           </div>
           <div className="flex gap-3 mt-4 md:mt-0">
             <Button
-              variant="outline"
+              variant="primary"
               onClick={() => setShowFilters(!showFilters)}
               className="flex items-center bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100"
             >
@@ -216,7 +216,7 @@ const TenantUsersPage: React.FC = () => {
               Filters
             </Button>
             <Button
-              variant="outline"
+              variant="primary"
               onClick={exportUsers}
               className="flex items-center bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100"
             >
@@ -224,7 +224,7 @@ const TenantUsersPage: React.FC = () => {
               Export
             </Button>
             <Button
-              variant="outline"
+              variant="primary"
               onClick={toggleInviteForm}
               className="flex items-center"
             >
@@ -273,7 +273,7 @@ const TenantUsersPage: React.FC = () => {
               </div>
               <div className="flex items-end">
                 <Button
-                  variant="outline"
+                  variant="primary"
                   onClick={resetFilters}
                   className="w-full"
                 >
@@ -294,7 +294,7 @@ const TenantUsersPage: React.FC = () => {
             </h2>
             <button
               onClick={toggleInviteForm}
-              className="text-gray-500 hover:text-gray-700 transition-colors"
+              className="text-black hover:text-gray-700 transition-colors"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>
@@ -342,7 +342,7 @@ const TenantUsersPage: React.FC = () => {
             </p>
             {(searchQuery || filterRole) && (
               <Button
-                variant="outline"
+                variant="primary"
                 onClick={resetFilters}
                 className="mt-4 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
               >
@@ -424,7 +424,7 @@ const TenantUsersPage: React.FC = () => {
                   <div className="border-t border-gray-100 pt-4 mt-4">
                     <div className="flex justify-end">
                       <Button
-                        variant="outline"
+                        variant="danger"
                         size="sm"
                         onClick={() => removeUser(tenantUser)}
                         className="bg-red-50 text-red-700 border-red-300 hover:bg-red-100"
@@ -452,7 +452,7 @@ const TenantUsersPage: React.FC = () => {
           </div>
           <div className="flex space-x-2">
             <Button
-              variant="outline"
+              variant="primary"
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
               className="flex items-center bg-white border-gray-300 text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
@@ -461,7 +461,7 @@ const TenantUsersPage: React.FC = () => {
               Previous
             </Button>
             <Button
-              variant="outline"
+              variant="primary"
               onClick={() => setCurrentPage((prev) => prev + 1)}
               disabled={currentPage * pageSize >= tenantUsers.total}
               className="flex items-center bg-white border-gray-300 text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"

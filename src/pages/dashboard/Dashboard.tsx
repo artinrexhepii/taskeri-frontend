@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTasks } from '../../api/hooks/tasks/useTasks';
 import { useProjects } from '../../api/hooks/projects/useProjects';
@@ -18,6 +18,7 @@ import {
 import { Link } from 'react-router-dom';
 import { TaskBase, TaskResponse, TaskStatus } from '../../types/task.types';
 import { motion } from 'framer-motion';
+import Button from '../../components/common/Button/Button';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -28,6 +29,23 @@ const Dashboard: React.FC = () => {
   const tasks = tasksData?.items || [];
   const projects = projectsData || [];
   const companies = companiesData || [];
+
+  const [quote, setQuote] = useState('');
+
+  useEffect(() => {
+    
+    fetch('https://api.jsongpt.com/json?prompt=Generate 1 motivational quotes &quotes=array of quotes')
+      .then(res => res.json())
+      .then(data => {
+        if (data.quotes && data.quotes.length > 0) {
+          setQuote(data.quotes[0]);
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch motivational quote', err);
+        setQuote("Stay focused and never give up on your goals.");
+      });
+  }, []);
 
   // Filter tasks based on user role and assignment
   const filteredTasks = useMemo(() => {
@@ -100,7 +118,7 @@ const Dashboard: React.FC = () => {
               Welcome back, {user?.first_name || 'User'} 👋
             </h1>
             <p className="text-gray-800 text-lg">
-              Here's what's happening in your workspace today
+              {quote || "See what's happening today!"}
             </p>
           </div>
           <div className="flex space-x-4">
@@ -112,13 +130,9 @@ const Dashboard: React.FC = () => {
               New Task
             </Link>
             {user?.role_id !== 3 && (
-              <Link 
-                to="/projects/new" 
-                className="inline-flex items-center px-4 py-2 bg-primary border border-transparent rounded-lg shadow-sm text-sm font-medium text-white hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 hover:shadow-md"
-              >
-                <PlusIcon className="h-5 w-5 mr-2" />
-                New Project
-              </Link>
+             <Button href="/projects/new" variant="primary" leftIcon={<PlusIcon className="h-5 w-5" />}>
+             New Project
+           </Button>
             )}
           </div>
         </motion.div>

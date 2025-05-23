@@ -8,13 +8,13 @@ const AuthLayout: React.FC = () => {
       <div className="w-full max-w-4xl space-y-8">
         {/* Logo */}
         <div>
-          <Logo className="mx-auto h-16 w-auto" />
+          <Logo className=" mx-auto h-48 w-auto" />
         </div>
 
         
 
         {/* Auth content */}
-        <div className="bg-background-paper w-full py-8 px-4 shadow-sm rounded-lg sm:px-10">
+        <div className="bg-background-paper w-full py-1 px-4 shadow-sm rounded-lg ">
           <Outlet />
         </div>
 

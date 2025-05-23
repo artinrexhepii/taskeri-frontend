@@ -159,7 +159,8 @@ export default function ProjectForm() {
             <Card 
               sx={{ 
                 p: 4,
-                background: `linear-gradient(135deg, ${alpha(getStatusColor(formData.status as ProjectStatus), 0.1)} 0%, ${alpha(getStatusColor(formData.status as ProjectStatus), 0.05)} 100%)`,
+               background: "linear-gradient(135deg, #d1f4f0 0%, #b2e4e0 100%)",
+               // background: `linear-gradient(135deg, ${alpha(getStatusColor(formData.status as ProjectStatus), 0.1)} 0%, ${alpha(getStatusColor(formData.status as ProjectStatus), 0.05)} 100%)`,
                 border: `1px solid ${alpha(getStatusColor(formData.status as ProjectStatus), 0.2)}`,
                 borderRadius: 2,
               }}
@@ -233,7 +234,7 @@ export default function ProjectForm() {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <InfoIcon color="primary" />
+                            <InfoIcon color="secondary" />
                           </InputAdornment>
                         ),
                       }}
@@ -258,14 +259,14 @@ export default function ProjectForm() {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <DescriptionIcon color="primary" />
+                            <DescriptionIcon color="secondary" />
                           </InputAdornment>
                         ),
                       }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           '&:hover fieldset': {
-                            borderColor: 'primary.main',
+                            borderColor: 'secondary.main',
                           },
                         },
                       }}
@@ -284,7 +285,7 @@ export default function ProjectForm() {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <CalendarIcon color="primary" />
+                            <CalendarIcon color="secondary" />
                           </InputAdornment>
                         ),
                       }}
@@ -309,7 +310,7 @@ export default function ProjectForm() {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <CalendarIcon color="primary" />
+                            <CalendarIcon color="secondary" />
                           </InputAdornment>
                         ),
                       }}
@@ -338,7 +339,7 @@ export default function ProjectForm() {
                                 color: getStatusColor(formData.status as ProjectStatus),
                               }}
                             >
-                              {getStatusIcon(formData.status as ProjectStatus)}
+                             
                             </Box>
                           </InputAdornment>
                         ),
@@ -393,7 +394,7 @@ export default function ProjectForm() {
                             startAdornment: (
                               <>
                                 <InputAdornment position="start">
-                                  <GroupIcon color="primary" />
+                                  <GroupIcon color="secondary" />
                                 </InputAdornment>
                                 {params.InputProps.startAdornment}
                               </>
@@ -442,8 +443,11 @@ export default function ProjectForm() {
                     <Stack direction="row" spacing={2} justifyContent="flex-end">
                       <Button
                         variant="outlined"
+                        
                         onClick={() => navigate('/projects')}
                         sx={{
+                          borderColor: 'teal',
+                          color: 'black',
                           transition: 'all 0.2s ease-in-out',
                           '&:hover': {
                             transform: 'translateY(-2px)',
@@ -461,7 +465,9 @@ export default function ProjectForm() {
                           '&:hover': {
                             transform: 'translateY(-2px)',
                             boxShadow: 4,
-                          }
+                            
+                          },
+                          bgcolor: 'teal',
                         }}
                       >
                         {isEditMode ? 'Update' : 'Create'} Project

@@ -200,12 +200,14 @@ export default function TaskForm() {
                   <Button
                     variant="outlined"
                     onClick={() => navigate('/tasks')}
+                    sx={{ color: 'teal'}}
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
                     variant="contained"
+                    sx={{ backgroundColor: 'teal', color: 'white' }}
                   >
                     {isEditMode ? 'Update' : 'Create'} Task
                   </Button>

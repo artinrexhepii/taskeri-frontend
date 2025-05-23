@@ -61,7 +61,7 @@ const Modal: React.FC<ModalProps> = ({
           leaveFrom="opacity-100 scale-100"
           leaveTo="opacity-0 scale-95"
         >
-          <div className="flex min-h-screen items-center justify-center p-4">
+          <div className="flex min-h-screen items-center  justify-center p-4">
             <Dialog.Panel 
               className={`
                 w-full ${maxWidthClasses[size]} 
@@ -71,7 +71,7 @@ const Modal: React.FC<ModalProps> = ({
             >
               {/* Header */}
               {(title || !hideClose) && (
-                <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+                <div className="flex items-center justify-between bg-white px-6 py-4 border-b border-border">
                   {title && (
                     <Dialog.Title className="text-lg font-semibold text-text-primary">
                       {title}
@@ -90,7 +90,7 @@ const Modal: React.FC<ModalProps> = ({
               )}
 
               {/* Content */}
-              <div className="px-6 py-4">{children}</div>
+              <div className="px-6 bg-white py-4">{children}</div>
 
               {/* Footer */}
               {footer && (

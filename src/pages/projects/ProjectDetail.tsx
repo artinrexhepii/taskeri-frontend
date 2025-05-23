@@ -6,7 +6,6 @@ import {
   Autocomplete,
   Avatar,
   Box,
-  Button,
   Card,
   Chip,
   Container,
@@ -61,6 +60,7 @@ import { useAssignUserToProject } from '../../api/hooks/user-projects/useAssignU
 import { useRemoveUserFromProject } from '../../api/hooks/user-projects/useRemoveUserFromProject';
 import { ProjectStatus } from '../../types/project.types';
 import { motion, AnimatePresence } from 'framer-motion';
+import Button from '../../components/common/Button/Button';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -251,17 +251,10 @@ export default function ProjectDetail() {
               <Box display="flex" justifyContent="space-between" alignItems="flex-start">
                 <Box>
                   <Button
-                    startIcon={<ArrowBackIcon />}
+                    leftIcon={<ArrowBackIcon />}
                     onClick={() => navigate('/projects')}
-                    sx={{ 
-                      mb: 3,
-                      color: 'text.primary',
-                      '&:hover': { 
-                        bgcolor: 'action.hover',
-                        transform: 'translateX(-4px)',
-                      },
-                      transition: 'all 0.2s ease-in-out',
-                    }}
+                    variant="secondary"
+                    className='mb-2'
                   >
                     Back to Projects
                   </Button>
@@ -348,7 +341,7 @@ export default function ProjectDetail() {
                   <Stack spacing={3}>
                     <Box>
                       <Box display="flex" alignItems="center" mb={2}>
-                        <CalendarIcon sx={{ mr: 1, color: 'primary.main' }} />
+                        <CalendarIcon sx={{ mr: 1, color: 'teal' }} />
                         <Typography variant="subtitle1" sx={{ fontWeight: 'medium', color: 'text.primary' }}>
                           Timeline
                         </Typography>
@@ -363,7 +356,7 @@ export default function ProjectDetail() {
                             bgcolor: 'action.hover',
                           }}
                         >
-                          <TimelineIcon sx={{ mr: 1, color: 'primary.main' }} />
+                          <TimelineIcon sx={{ mr: 1, color: 'teal' }} />
                           <Box>
                             <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>Start Date</Typography>
                             <Typography variant="body2" sx={{ color: 'text.primary' }}>
@@ -381,7 +374,7 @@ export default function ProjectDetail() {
                               bgcolor: 'action.hover',
                             }}
                           >
-                            <AssessmentIcon sx={{ mr: 1, color: 'primary.main' }} />
+                            <AssessmentIcon sx={{ mr: 1, color: 'teal' }} />
                             <Box>
                               <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>End Date</Typography>
                               <Typography variant="body2" sx={{ color: 'text.primary' }}>
@@ -412,7 +405,7 @@ export default function ProjectDetail() {
                     <Stack spacing={3}>
                       <Box>
                         <Box display="flex" alignItems="center" mb={2}>
-                          <GroupIcon sx={{ mr: 1, color: 'primary.main' }} />
+                          <GroupIcon sx={{ mr: 1, color: 'teal' }} />
                           <Typography variant="subtitle1" sx={{ fontWeight: 'medium', color: 'text.primary' }}>
                             Team Size
                           </Typography>
@@ -454,7 +447,7 @@ export default function ProjectDetail() {
                   <Stack spacing={3}>
                     <Box>
                       <Box display="flex" alignItems="center" mb={2}>
-                        <SpeedIcon sx={{ mr: 1, color: 'primary.main' }} />
+                        <SpeedIcon sx={{ mr: 1, color: 'teal' }} />
                         <Typography variant="subtitle1" sx={{ fontWeight: 'medium', color: 'text.primary' }}>
                           Project Progress
                         </Typography>
@@ -506,12 +499,16 @@ export default function ProjectDetail() {
                   value={tabValue} 
                   onChange={(_, newValue) => setTabValue(newValue)}
                   sx={{
+                    '& .MuiTabs-indicator': {
+                      bgcolor: 'teal',
+                    },
                     '& .MuiTab-root': {
                       minWidth: 120,
                       transition: 'all 0.2s ease-in-out',
                       '&:hover': {
-                        color: 'primary.main',
+                        color: 'teal',
                       },
+                      
                     },
                     '& .Mui-selected': {
                       fontWeight: 'bold',
@@ -520,8 +517,8 @@ export default function ProjectDetail() {
                 >
                   <Tab 
                     label={
-                      <Box display="flex" alignItems="center">
-                        <TaskIcon sx={{ mr: 1 }} />
+                      <Box display="flex" alignItems="center" color={tabValue === 0 ? 'teal' : 'text.primary'}>
+                        <TaskIcon sx={{ mr: 1, color: "teal" }} />
                         Tasks
                       </Box>
                     } 
@@ -554,16 +551,10 @@ export default function ProjectDetail() {
                       </Typography>
                     </Box>
                     <Button 
-                      variant="contained" 
+                      variant="primary" 
                       onClick={() => navigate(`/tasks/new?project_id=${id}`)}
-                      startIcon={<AddIcon />}
-                      sx={{
-                        transition: 'all 0.2s ease-in-out',
-                        '&:hover': {
-                          transform: 'translateY(-2px)',
-                          boxShadow: 4,
-                        }
-                      }}
+                      leftIcon={<AddIcon />}
+                      
                     >
                       Add Task
                     </Button>
@@ -593,7 +584,7 @@ export default function ProjectDetail() {
                               <Stack spacing={2}>
                                 <Box display="flex" justifyContent="space-between" alignItems="flex-start">
                                   <Box display="flex" alignItems="center" gap={1}>
-                                    <TaskIcon color="primary" />
+                                    <TaskIcon color="secondary" />
                                     <Typography variant="subtitle1" sx={{ color: 'text.primary' }}>{task.title}</Typography>
                                   </Box>
                                   <Chip
@@ -684,7 +675,7 @@ export default function ProjectDetail() {
                                   >
                                     {task.assignees?.map((assignee: Assignee) => (
                                       <Tooltip key={assignee.id} title={`${assignee.first_name} ${assignee.last_name}`}>
-                                        <Avatar sx={{ bgcolor: 'primary.main' }}>
+                                        <Avatar sx={{ bgcolor: 'teal' }}>
                                           {assignee.first_name?.[0]}{assignee.last_name?.[0]}
                                         </Avatar>
                                       </Tooltip>
@@ -715,16 +706,10 @@ export default function ProjectDetail() {
                         Get started by adding your first task to this project
                       </Typography>
                       <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
+                        variant="primary"
+                        leftIcon={<AddIcon />}
                         onClick={() => navigate(`/tasks/new?project_id=${id}`)}
-                        sx={{
-                          transition: 'all 0.2s ease-in-out',
-                          '&:hover': {
-                            transform: 'translateY(-2px)',
-                            boxShadow: 4,
-                          }
-                        }}
+                        
                       >
                         Create First Task
                       </Button>
@@ -780,7 +765,7 @@ export default function ProjectDetail() {
                                 }
                               >
                                 <ListItemAvatar>
-                                  <Avatar sx={{ bgcolor: 'primary.main' }}>
+                                  <Avatar sx={{ bgcolor: 'teal' }}>
                                     {user.first_name?.[0]}{user.last_name?.[0]}
                                   </Avatar>
                                 </ListItemAvatar>
@@ -839,7 +824,7 @@ export default function ProjectDetail() {
                                 sx={{
                                   '& .MuiOutlinedInput-root': {
                                     '&:hover fieldset': {
-                                      borderColor: 'primary.main',
+                                      borderColor: 'teal',
                                     },
                                   },
                                 }}
@@ -847,7 +832,7 @@ export default function ProjectDetail() {
                             )}
                             renderOption={(props, option) => (
                               <Box component="li" {...props}>
-                                <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
+                                <Avatar sx={{ mr: 2, bgcolor: 'teal' }}>
                                   {option.first_name?.[0]}{option.last_name?.[0]}
                                 </Avatar>
                                 <Box>
@@ -862,17 +847,11 @@ export default function ProjectDetail() {
                             )}
                           />
                           <Button
-                            variant="contained"
+                            variant="primary"
                             disabled={!selectedUser}
                             onClick={handleAssignUser}
-                            startIcon={<AddIcon />}
-                            sx={{
-                              transition: 'all 0.2s ease-in-out',
-                              '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: 4,
-                              }
-                            }}
+                            leftIcon={<AddIcon />}
+                          
                           >
                             Add to Project
                           </Button>
