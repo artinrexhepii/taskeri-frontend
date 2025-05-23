@@ -1,18 +1,17 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+import Logo from "../../common/Logo/Logo";
 
 const AuthLayout: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background-main py-12 px-4 sm:px-6 ">
       <div className="w-full max-w-4xl space-y-8">
         {/* Logo */}
-        <div className="flex justify-center">
-          <img
-            src="/logo.svg"
-            alt="Taskeri"
-            className="h-12 w-auto"
-          />
+        <div>
+          <Logo className="mx-auto h-16 w-auto" />
         </div>
+
+        
 
         {/* Auth content */}
         <div className="bg-background-paper w-full py-8 px-4 shadow-sm rounded-lg sm:px-10">
