@@ -10,6 +10,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import theme from './theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+
 // Loading fallback component
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -17,11 +18,11 @@ const LoadingFallback = () => (
   </div>
 );
 
-const queryClient = new QueryClient();
+
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <AuthProvider>
@@ -36,7 +37,6 @@ function App() {
           </NotificationProvider>
         </AuthProvider>
       </ThemeProvider>
-    </QueryClientProvider>
   );
 }
 
