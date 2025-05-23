@@ -38,7 +38,7 @@ export const API_ENDPOINTS = {
     
     // Department endpoints
     DEPARTMENTS: {
-      BASE: '/departments',
+      BASE: '/departments/',
       DETAIL: (id: number) => `/departments/${id}`,
     },
     
