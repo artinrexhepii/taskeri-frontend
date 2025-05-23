@@ -51,14 +51,14 @@ export const API_ENDPOINTS = {
     
     // File attachment endpoints
     ATTACHMENTS: {
-      BASE: '/attachments',
+      BASE: '/attachments/',
       DETAIL: (id: number) => `/attachments/${id}`,
       BY_TASK: (taskId: number) => `/attachments/task/${taskId}`,
     },
     
     // Time logging endpoints
     TIME_LOGS: {
-      BASE: '/time-logs',
+      BASE: '/time-logs/',
       DETAIL: (id: number) => `/time-logs/${id}`,
       BY_TASK: (taskId: number) => `/time-logs/task/${taskId}`,
       BY_USER: (userId: number) => `/time-logs/user/${userId}`,
@@ -74,7 +74,7 @@ export const API_ENDPOINTS = {
     
     // Leave request endpoints
     LEAVE_REQUESTS: {
-      BASE: '/leave-requests',
+      BASE: '/leave-requests/',
       DETAIL: (id: number) => `/leave-requests/${id}`,
       BY_USER: (userId: number) => `/leave-requests/user/${userId}`,
     },
@@ -113,7 +113,7 @@ export const API_ENDPOINTS = {
     
     // Invoice endpoints
     INVOICES: {
-      BASE: '/invoices',
+      BASE: '/invoices/',
       DETAIL: (id: number) => `/invoices/${id}`,
     },
   
