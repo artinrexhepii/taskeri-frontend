@@ -44,14 +44,12 @@ export default function UserProfiles() {
     position: '',
     skills: '',
     bio: '',
-    profile_pic: '',
   });
 
   const [formUpdate, setFormUpdate] = useState<UserProfileUpdate>({
     position: '',
     skills: '',
     bio: '',
-    profile_pic: '',
   });
 
   const userProfileQuery = useUserProfile(selectedUserId ?? 0);
@@ -67,7 +65,6 @@ export default function UserProfiles() {
         position: '',
         skills: '',
         bio: '',
-        profile_pic: '',
       });
     }
   };
@@ -93,10 +90,10 @@ export default function UserProfiles() {
         position: userProfileQuery.data.position || '',
         skills: userProfileQuery.data.skills || '',
         bio: userProfileQuery.data.bio || '',
-        profile_pic: userProfileQuery.data.profile_pic || '',
       });
     }
   }, [userProfileQuery.data, selectedUserId, tabValue]);
+
   return (
     <Stack spacing={3}>
       <Typography variant="h4">User Profiles</Typography>
@@ -152,13 +149,6 @@ export default function UserProfiles() {
               multiline
               value={formCreate.bio}
               onChange={(e) => setFormCreate((prev) => ({ ...prev, bio: e.target.value }))}
-            />
-            <TextField
-              label="Profile Picture URL"
-              value={formCreate.profile_pic}
-              onChange={(e) =>
-                setFormCreate((prev) => ({ ...prev, profile_pic: e.target.value }))
-              }
             />
 
             <Button variant="contained" onClick={handleCreateSubmit}>
@@ -238,13 +228,6 @@ export default function UserProfiles() {
               multiline
               value={formUpdate.bio}
               onChange={(e) => setFormUpdate((prev) => ({ ...prev, bio: e.target.value }))}
-            />
-            <TextField
-              label="Profile Pic URL"
-              value={formUpdate.profile_pic}
-              onChange={(e) =>
-                setFormUpdate((prev) => ({ ...prev, profile_pic: e.target.value }))
-              }
             />
             <Button
               variant="contained"
