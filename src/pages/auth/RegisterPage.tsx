@@ -90,27 +90,23 @@ const RegisterPage: React.FC = () => {
   const errorMessage = loginMutation.error?.message || 'Login failed. Please check your credentials.';
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="max-w-md w-full space-y-8">
-        <div>
-          <img
-            className="mx-auto h-12 w-auto"
-            src="/logo.svg"
-            alt="Taskeri"
-          />
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-text-primary">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <Card className=" bg-white shadow-2xl rounded-xl">
+        <div className="px-6 py-8">
+          <h2 className="text-center text-4xl font-extrabold text-gray-900">
             Register Company Account
           </h2>
-          <p className="mt-2 text-center text-sm text-text-secondary">
+          <p className="text-center text-lg text-gray-600 mt-2">
             Create a company account to manage your team
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+        <form className="space-y-6 px-6 pb-8" onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Input
                 label="First Name"
+                className="border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
                 {...register('firstName', {
                   required: 'First name is required'
                 })}
@@ -119,6 +115,7 @@ const RegisterPage: React.FC = () => {
 
               <Input
                 label="Last Name"
+                className="border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
                 {...register('lastName', {
                   required: 'Last name is required'
                 })}
@@ -129,6 +126,7 @@ const RegisterPage: React.FC = () => {
             <Input
               label="Email address"
               type="email"
+              className="border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
               {...register('email', {
                 required: 'Email is required',
                 pattern: {
@@ -142,6 +140,7 @@ const RegisterPage: React.FC = () => {
             <Input
               label="Password"
               type="password"
+              className="border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
               {...register('password', {
                 required: 'Password is required',
                 minLength: {
@@ -155,6 +154,7 @@ const RegisterPage: React.FC = () => {
             <Input
               label="Confirm Password"
               type="password"
+              className="border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
               {...register('confirmPassword', {
                 required: 'Please confirm your password',
                 validate: value => 
@@ -165,6 +165,7 @@ const RegisterPage: React.FC = () => {
 
             <Input
               label="Company Name"
+              className="border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
               {...register('companyName', {
                 required: 'Company name is required'
               })}
@@ -176,12 +177,12 @@ const RegisterPage: React.FC = () => {
               <input
                 id="agree-terms"
                 type="checkbox"
-                className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
+                className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                 {...register('agreeToTerms', {
                   required: 'You must agree to the terms and conditions'
                 })}
               />
-              <label htmlFor="agree-terms" className="ml-2 block text-sm text-text-secondary">
+              <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-600">
                 I agree to the{' '}
                 <Link
                   to="/terms"
@@ -192,14 +193,14 @@ const RegisterPage: React.FC = () => {
               </label>
             </div>
             {errors.agreeToTerms && (
-              <p className="mt-1 text-sm text-error">
+              <p className="text-sm text-red-600">
                 {errors.agreeToTerms.message}
               </p>
             )}
           </div>
 
           {(loginMutation.isError) && (
-            <Alert severity="error" sx={{ mt: 2 }}>
+            <Alert severity="error">
               {errorMessage}
             </Alert>
           )}
@@ -208,7 +209,7 @@ const RegisterPage: React.FC = () => {
             <Button
               type="submit"
               variant="primary"
-              className='w-full'
+              className="w-full bg-primary text-gray-800  font-medium rounded-lg shadow-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               isLoading={isSubmitting || isLoading || loginMutation.isPending}
             >
               Register Company
@@ -216,7 +217,7 @@ const RegisterPage: React.FC = () => {
           </div>
 
           <div className="text-center text-sm">
-            <span className="text-text-secondary">Already have an account? </span>
+            <span className="text-gray-600">Already have an account? </span>
             <Link
               to="/login"
               className="font-medium text-primary hover:text-primary/80"
