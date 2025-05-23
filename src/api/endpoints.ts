@@ -44,7 +44,7 @@ export const API_ENDPOINTS = {
     
     // Comment endpoints
     COMMENTS: {
-      BASE: '/comments',
+      BASE: '/comments/',
       DETAIL: (id: number) => `/comments/${id}`,
       BY_TASK: (taskId: number) => `/comments/task/${taskId}`,
     },
